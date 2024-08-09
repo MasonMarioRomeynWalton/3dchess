@@ -15,4 +15,4 @@ To run:
 
 ##Other
 
-'pip-compile requirements.in --allow-unsafe --strip-extras`
+`pip-compile requirements.in --allow-unsafe --strip-extras`
