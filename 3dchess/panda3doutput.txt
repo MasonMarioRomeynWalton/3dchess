@@ -1,0 +1,38 @@
+Known pipe types:
+  glxGraphicsPipe
+(1 aux display modules not yet loaded.)
+:gobj(error): Texture::read() - couldn't read: maps/white.png
+:gobj(error): Unable to find texture "maps/white.png" on model-path /home/mason/Documents/python/Chess/3dchess/3dchess:/usr/local/lib/python3.10/dist-packages/panda3d/etc/..:/usr/local/lib/python3.10/dist-packages/panda3d/etc/../models
+Known pipe types:
+  glxGraphicsPipe
+(1 aux display modules not yet loaded.)
+:assimp(error): Unable to open file "/home/mason/Documents/python/Chess/3dchess/3dchess/{home}/static/models/board2.dae".
+:assimp(error): Unable to open file "/usr/local/lib/python3.10/dist-packages/panda3d/etc/../{home}/static/models/board2.dae".
+:assimp(error): Unable to open file "/usr/local/lib/python3.10/dist-packages/panda3d/etc/../models/{home}/static/models/board2.dae".
+:loader(error): Couldn't load file {home}/static/models/board2.dae: not found on model path (currently: "/home/mason/Documents/python/Chess/3dchess/3dchess:/usr/local/lib/python3.10/dist-packages/panda3d/etc/..:/usr/local/lib/python3.10/dist-packages/panda3d/etc/../models")
+Known pipe types:
+  glxGraphicsPipe
+(1 aux display modules not yet loaded.)
+:assimp(warning): Mesh 0: Not suitable for vcache optimization
+:assimp(warning): Mesh 0: Not suitable for vcache optimization
+:assimp(warning): Mesh 0: Not suitable for vcache optimization
+:assimp(warning): Mesh 1: Not suitable for vcache optimization
+:assimp(warning): Mesh 0: Not suitable for vcache optimization
+:assimp(warning): Mesh 2: Not suitable for vcache optimization
+:assimp(warning): Mesh 3: Not suitable for vcache optimization
+:assimp(warning): Mesh 8: Not suitable for vcache optimization
+:assimp(warning): Mesh 3: Not suitable for vcache optimization
+:assimp(warning): Mesh 1: Not suitable for vcache optimization
+:assimp(warning): Mesh 8: Not suitable for vcache optimization
+:assimp(warning): Mesh 11: Not suitable for vcache optimization
+:assimp(warning): Collada: No material specified for subgroup <> in geometry <Sphere_005-mesh>.
+:assimp(warning): Mesh 0: Not suitable for vcache optimization
+:assimp(warning): Mesh 3: Not suitable for vcache optimization
+:assimp(warning): Mesh 2: Not suitable for vcache optimization
+:assimp(warning): Mesh 5: Not suitable for vcache optimization
+:assimp(warning): Mesh 2: Not suitable for vcache optimization
+:assimp(warning): Mesh 3: Not suitable for vcache optimization
+Known pipe types:
+  glxGraphicsPipe
+(1 aux display modules not yet loaded.)
+Assertion failed: _has_mouse at line 39 of built1.11/include/mouseWatcher.I
