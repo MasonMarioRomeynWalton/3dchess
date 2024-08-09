@@ -1,0 +1,6 @@
+turn: -1
+capturedposw: 0
+capturedposb: 1
+moved_from_last_turn: (4,4,5)
+enpass: (None,None,None)
+gameover: 0
