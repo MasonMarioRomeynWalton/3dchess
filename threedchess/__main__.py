@@ -1,10 +1,10 @@
 #!/bin/python3
 
-from direct.stdpy import threading
 from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
 from panda3d.core import *
 
+import threading
 import os
 import sys
 import traceback

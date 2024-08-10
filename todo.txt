@@ -1,0 +1,10 @@
+make quit function
+figure out gitignore
+make file for panda 3d thread
+make file for command line thread
+use camera class in client.py
+merge models and the like so they are shared
+merge main.py with client.py
+make git repo for the backend
+change function names of pitch roll yaw to tilt roll pan
+change to normal threading library for client
