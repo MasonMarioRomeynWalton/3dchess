@@ -11,7 +11,7 @@ import traceback
 import time
 from math import *
 
-import threedchess.cameras as cameras
+import lib.cameras as cameras
 
 ##
 
@@ -1512,16 +1512,16 @@ def check_for_input(camera, task):
         camera.move_right(movement_distance)
 
     if (keymap['i']!=0):
-        camera.pitch_up(rotation_distance)
+        camera.tilt_up(rotation_distance)
 
     if (keymap['k']!=0):
-        camera.pitch_down(rotation_distance)
+        camera.tilt_down(rotation_distance)
 
     if (keymap['j']!=0):
-        camera.yaw_right(rotation_distance)
+        camera.pan_right(rotation_distance)
 
     if (keymap['l']!=0):
-        camera.yaw_left(rotation_distance)
+        camera.pan_left(rotation_distance)
 
     if (keymap['c']!=0):
         camera.init_white()

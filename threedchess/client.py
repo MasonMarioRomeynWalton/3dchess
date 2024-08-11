@@ -1,15 +1,19 @@
 #!/usr/bin/python3
 import socket
 import json
-from direct.stdpy import threading
+
 from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
 from panda3d.core import *
+
+import threading
 import os
 import sys
 import traceback
 import time
 from math import *
+
+import lib.cameras as cameras
 
 ##
 
@@ -762,205 +766,6 @@ class MyApp(ShowBase):
 
 ##
 
-class cameras():
-    def redo(self,a,b,x,y,z):
-        self.a = a
-        self.b = b
-        self.x = x
-        self.y = y
-        self.z = z
-        self.m = LMatrix4f()
-        i = LVecBase4f()
-        j = LVecBase4f()
-        k = LVecBase4f()
-        l = LVecBase4f()
-        i.set(1,0,0,0)
-        j.set(0,cos(self.a),-sin(self.a),0)
-        k.set(0,sin(self.a),cos(self.a),0)
-        l.set(0,0,0,1)
-        self.m.setRow(0,i)
-        self.m.setRow(1,j)
-        self.m.setRow(2,k)
-        self.m.setRow(3,l)
-        self.n = LMatrix4f()
-        i = LVecBase4f()
-        j = LVecBase4f()
-        k = LVecBase4f()
-        l = LVecBase4f()
-        i.set(cos(self.b),0,-sin(self.b),0)
-        j.set(0,1,0,0)
-        k.set(sin(self.b),0,cos(self.b),0)
-        l.set(0,0,0,1)
-        self.n.setRow(0,i)
-        self.n.setRow(1,j)
-        self.n.setRow(2,k)
-        self.n.setRow(3,l)
-
-    def __init__(self,a,b,x,y,z):
-        self.redo(a,b,x,y,z)
-        self.prevtime = 0
-        taskMgr.add(self.cameramove, 'cameramove')
-
-    def far(self):
-        if self.z > 32*game.s+game.fs:
-            self.redo(pi/2,-pi/2,-30,22.5,22.5)
-        elif self.z < -32*game.s+game.fs:
-            self.redo(pi/2,-pi/2,-30,22.5,22.5)
-        elif self.x < -28*game.s+game.fs:
-            self.redo(pi/2,-pi/2,-30,22.5,22.5)
-        elif self.y > 28*game.s+game.fs:
-            self.redo(pi/2,-pi/2,-30,22.5,22.5)
-        elif self.x > 28*game.s+game.fs:
-            self.redo(pi/2,-pi/2,-30,22.5,22.5)
-        elif self.y < -28*game.s+game.fs:
-            self.redo(pi/2,-pi/2,-30,22.5,22.5)
-
-    def up(self):
-        self.y = self.y+self.elapsed[0]
-        self.far()
-        return Task.cont
-
-    def down(self):
-        self.y = self.y-self.elapsed[0]
-        self.far()
-        return Task.cont
-
-    def front(self):
-        self.z = self.z-cos(self.b)*self.elapsed[0]
-        self.x = self.x-sin(self.b)*self.elapsed[0]
-        self.far()
-        return Task.cont
-
-    def back(self):
-        self.z = self.z+cos(self.b)*self.elapsed[0]
-        self.x = self.x+sin(self.b)*self.elapsed[0]
-        self.far()
-        return Task.cont
-
-    def left(self):
-        self.x = self.x-cos(self.b)*self.elapsed[0]
-        self.z = self.z+sin(self.b)*self.elapsed[0]
-        self.far()
-        return Task.cont
-
-    def right(self):
-        self.x = self.x+cos(self.b)*self.elapsed[0]
-        self.z = self.z-sin(self.b)*self.elapsed[0]
-        self.far()
-        return Task.cont
-
-    def lup(self):
-        i = LVecBase4f()
-        j = LVecBase4f()
-        k = LVecBase4f()
-        l = LVecBase4f()
-        if self.a > 0:
-            self.a = self.a-self.elapsed[1]*pi/32
-        i.set(1,0,0,0)
-        j.set(0,cos(self.a),-sin(self.a),0)
-        k.set(0,sin(self.a),cos(self.a),0)
-        l.set(0,0,0,1)
-        self.m.setRow(0,i)
-        self.m.setRow(1,j)
-        self.m.setRow(2,k)
-        self.m.setRow(3,l)
-        return Task.cont
-
-    def ldown(self):
-        i = LVecBase4f()
-        j = LVecBase4f()
-        k = LVecBase4f()
-        l = LVecBase4f()
-        if self.a < pi:
-            self.a = self.a+self.elapsed[1]*pi/32
-        i.set(1,0,0,0)
-        j.set(0,cos(self.a),-sin(self.a),0)
-        k.set(0,sin(self.a),cos(self.a),0)
-        l.set(0,0,0,1)
-        self.m.setRow(0,i)
-        self.m.setRow(1,j)
-        self.m.setRow(2,k)
-        self.m.setRow(3,l)
-        return Task.cont
-
-    def lright(self):
-        i = LVecBase4f()
-        j = LVecBase4f()
-        k = LVecBase4f()
-        l = LVecBase4f()
-        self.b = self.b+self.elapsed[1]*pi/32
-        i.set(cos(self.b),0,-sin(self.b),0)
-        j.set(0,1,0,0)
-        k.set(sin(self.b),0,cos(self.b),0)
-        l.set(0,0,0,1)
-        self.n.setRow(0,i)
-        self.n.setRow(1,j)
-        self.n.setRow(2,k)
-        self.n.setRow(3,l)
-        return Task.cont
-
-    def lleft(self):
-        i = LVecBase4f()
-        j = LVecBase4f()
-        k = LVecBase4f()
-        l = LVecBase4f()
-        self.b = self.b - self.elapsed[1]*pi/32
-        i.set(cos(self.b),0,-sin(self.b),0)
-        j.set(0,1,0,0)
-        k.set(sin(self.b),0,cos(self.b),0)
-        l.set(0,0,0,1)
-        self.n.setRow(0,i)
-        self.n.setRow(1,j)
-        self.n.setRow(2,k)
-        self.n.setRow(3,l)
-        return Task.cont
-
-    def cameramove(self,task):
-        self.elapsed = ((task.time - self.prevtime)*20,(task.time - self.prevtime)*14)
-        if (keyMap['space']!=0):
-            self.up()
-        if (keyMap['z']!=0):
-            self.down()
-        if (keyMap['w']!=0):
-            self.front()
-        if (keyMap['a']!=0):
-            self.left()
-        if (keyMap['s']!=0):
-            self.back()
-        if (keyMap['d']!=0):
-            self.right()
-        if (keyMap['i']!=0):
-            self.lup()
-        if (keyMap['j']!=0):
-            self.lright()
-        if (keyMap['k']!=0):
-            self.ldown()
-        if (keyMap['l']!=0):
-            self.lleft()
-        if (keyMap['c']!=0):
-            self.redo(pi/2,-pi/2,-30,22.5,22.5)
-            setKey('c',0)
-        if (keyMap['v']!=0):
-            self.redo(pi/2,pi/2,75,22.5,22.5)
-            setKey('v',0)
-        if (keyMap['mouse1']!=0):
-            app.click()
-            setKey('mouse1',0)
-        if (keyMap['mouse3']!=0):
-            app.click2()
-            setKey('mouse3',0)
-        if (keyMap['enter']!=0):
-            app.stuff2()
-            setKey('enter',0)
-        self.o = LMatrix4()
-        self.o.multiply(self.m,self.n)
-        app.camera.setMat(self.o)
-        app.camera.setPos(self.x,self.y,self.z)
-        self.prevtime = task.time
-        return task.cont
-
-##
-
 home = "../3dchess"
 
 read = read()
@@ -1019,44 +824,102 @@ elif connect_number == 2:
         print('You are playing white\n')
 game.restart()
 
+
 app = MyApp()
-if player == 1:
-    camera1 = cameras(pi/2,-pi/2,-30,22.5,22.5)
-if player == -1:
-    camera1 = cameras(pi/2,pi/2,75,22.5,22.5)
+
+## Our terminal thread
 
 inputthread = threading.Thread(target = read.stuff)
 inputthread.start()
 
-keyMap = {"space":0, "z":0, "w":0, "a":0, "s":0, "d":0, "c":0, "v":0, "i":0, "j":0, "k":0, "l":0, "mouse1":0,"mouse3":0,"enter":0}
-def setKey(key, value):
-    keyMap[key] = value
 
-base.accept('space', setKey, ["space",1])
-base.accept('space-up', setKey, ["space",0])
-base.accept('z', setKey, ["z",1])
-base.accept('z-up', setKey, ["z",0])
-base.accept('w', setKey, ["w",1])
-base.accept('w-up', setKey, ["w",0])
-base.accept('a', setKey, ["a",1])
-base.accept('a-up', setKey, ["a",0])
-base.accept('s', setKey, ["s",1])
-base.accept('s-up', setKey, ["s",0])
-base.accept('d', setKey, ["d",1])
-base.accept('d-up', setKey, ["d",0])
-base.accept('i', setKey, ["i",1])
-base.accept('i-up', setKey, ["i",0])
-base.accept('j', setKey, ["j",1])
-base.accept('j-up', setKey, ["j",0])
-base.accept('k', setKey, ["k",1])
-base.accept('k-up', setKey, ["k",0])
-base.accept('l', setKey, ["l",1])
-base.accept('l-up', setKey, ["l",0])
-base.accept('c', setKey, ["c",1])
-base.accept('v', setKey, ["v",1])
-base.accept('mouse1', setKey, ["mouse1",1])
-base.accept('mouse3', setKey, ["mouse3",1])
-base.accept('enter', setKey, ["enter",1])
+## Panda3d task
+
+camera = cameras.camera(game.s,game.fs)
+
+if player == 1:
+    camera.init_white()
+if player == -1:
+    camera.init_black()
+
+movement_keylist = ['space','z','w','a','s','d','i','j','k','l']
+hotkey_keylist = ['c','v','mouse1','mouse3','enter']
+keymap = {key:0 for key in movement_keylist+hotkey_keylist}
+
+def setKey(key, value):
+    keymap[key] = value
+
+for key in keymap.keys():
+    if key in movement_keylist:
+        base.accept(key, setKey, [key,1])
+        base.accept(f'{key}-up', setKey, [key,0])
+    if key in hotkey_keylist:
+        base.accept(key, setKey, [key,1])
+
+time_elapsed = 0
+def check_for_input(camera, task):
+    global time_elapsed
+    movement_distance = time_elapsed*20
+    rotation_distance = time_elapsed*14
+
+    if (keymap['space']!=0):
+        camera.move_up(movement_distance)
+
+    if (keymap['z']!=0):
+        camera.move_down(movement_distance)
+
+    if (keymap['w']!=0):
+        camera.move_forward(movement_distance)
+
+    if (keymap['a']!=0):
+        camera.move_left(movement_distance)
+
+    if (keymap['s']!=0):
+        camera.move_back(movement_distance)
+
+    if (keymap['d']!=0):
+        camera.move_right(movement_distance)
+
+    if (keymap['i']!=0):
+        camera.pitch_up(rotation_distance)
+
+    if (keymap['k']!=0):
+        camera.pitch_down(rotation_distance)
+
+    if (keymap['j']!=0):
+        camera.yaw_right(rotation_distance)
+
+    if (keymap['l']!=0):
+        camera.yaw_left(rotation_distance)
+
+    if (keymap['c']!=0):
+        camera.init_white()
+        setKey('c',0)
+
+    if (keymap['v']!=0):
+        camera.init_black()
+        setKey('v',0)
+
+    if (keymap['mouse1']!=0):
+        app.click()
+        setKey('mouse1',0)
+
+    if (keymap['mouse3']!=0):
+        app.click2()
+        setKey('mouse3',0)
+
+    if (keymap['enter']!=0):
+        app.stuff2()
+        setKey('enter',0)
+
+    time_elapsed = task.time - camera.time_at_last_update
+    camera.update_camera()
+        
+    camera.time_at_last_update = task.time
+    return task.cont
+
+taskMgr.add(check_for_input, 'cameramove', extraArgs=[camera], appendTask=True)
+
 
 while True:
     if app.step == True:

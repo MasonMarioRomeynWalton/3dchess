@@ -1,10 +1,22 @@
 make quit function
-figure out gitignore
-make file for panda 3d thread
-make file for command line thread
-use camera class in client.py
-merge models and the like so they are shared
+make captured pieces a different color(purple or orange)
+make last captured piece cyan
+change camera movement to the mouse
+change check if to far away function to middle of the board
+
+make file for panda 3d thread/ app -> panda3d_thread(game)/ should be able to run two different panda3ds simultaneously and have both update at the same time 
+make file for command line and make it main thread/ read -> command_line
+make file for a movement with a boolean for castling/capturing
+
+make file for game logic
+  move piece()
+  take away piece()
+  add piece()
+
+finish the logic for the movement of the pieces
 merge main.py with client.py
 make git repo for the backend
+
 change function names of pitch roll yaw to tilt roll pan
-change to normal threading library for client
+
+
