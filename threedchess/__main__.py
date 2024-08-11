@@ -1,9 +1,5 @@
 #!/bin/python3
 
-from direct.showbase.ShowBase import ShowBase
-from direct.task import Task
-from panda3d.core import *
-
 import threading
 import os
 import sys
@@ -11,7 +7,7 @@ import traceback
 import time
 from math import *
 
-import lib.cameras as cameras
+from lib import rendering_task
 
 ##
 
@@ -27,10 +23,6 @@ sys.excepthook = show_exception_and_exit
 class piecec:
     def __init__(self,typ,pos,col):
         self.atr = {'typ':typ,'pos':pos,'col':col,'first':0,'moved_last_turn':False,'ispicked1':False,'ispicked2':False}
-
-class boardc:
-    def __init__(self,pos,col):
-        self.atr = {'pos':pos,'col':col,'moved_last_turn':False,'ispicked1':False,'ispicked2':False}
 
 ##
 
@@ -342,16 +334,6 @@ class game():
         self.writer = open(file,'w')
         self.writer.writelines(self.save)
         self.writer.close()
-
-    def __init__(self):
-        ## Size of board
-        self.s = 5
-
-        ## Half of the size of the board
-        self.hs = self.s/2
-
-        ## Multiplier of the size of the board
-        self.fs = self.s*4.5
 
 game = game()
 
@@ -1150,297 +1132,6 @@ class movement:
 
 ##
 
-class MyApp(ShowBase):
-    def renders(self):
-        self.step = False
-        for u in range (0,len(game.pieces)):
-            game.pieces[u].atr['obj'] = loader.loadModel(f'{game.pieces[u].atr["typ"]}.dae')
-            game.pieces[u].atr['obj'].reparentTo(render)
-            game.pieces[u].atr['obj'].setPos(game.pieces[u].atr['pos'][1]*game.s,game.pieces[u].atr['pos'][2]*game.s,game.pieces[u].atr['pos'][0]*game.s)
-            game.pieces[u].atr['obj'].setScale(game.hs,game.hs,game.hs)
-            if game.pieces[u].atr['col'] == 1:
-                game.pieces[u].atr['obj'].setTexture(self.colour[0][0], 1)
-                game.pieces[u].atr['obj'].setHpr(0,0,180)
-            if game.pieces[u].atr['col'] == -1:
-                game.pieces[u].atr['obj'].setTexture(self.colour[0][1], 1)
-                game.pieces[u].atr['obj'].setHpr(0,0,0)
-            game.pieces[u].atr['obj'].setPythonTag('piece',game.pieces[u].atr)
-            if game.pieces[u].atr['pos'][2]-1 >= 0:
-                game.pieces[u].atr['rel'] = self.board[game.pieces[u].atr['pos'][1]-1][game.pieces[u].atr['pos'][2]-1][game.pieces[u].atr['pos'][0]-1]
-                self.board[game.pieces[u].atr['pos'][1]-1][game.pieces[u].atr['pos'][2]-1][game.pieces[u].atr['pos'][0]-1].atr['rel'] = game.pieces[u]
-            if game.pieces[u].atr['moved_last_turn'] == True:
-                self.rendersi(game.pieces[u].atr,'piece')
-        if not None in game.moved_from_last_turn:
-            self.board[game.moved_from_last_turn[1]-1][game.moved_from_last_turn[2]-1][game.moved_from_last_turn[0]-1].atr['obj'].setTexture(self.colour[3][2][1])
-        self.step = True
-
-    def unrenders(self):
-        self.step = False
-        for u in range(0,len(game.pieces)):
-            game.pieces[u].atr['obj'].removeNode()
-            time.sleep(0.01)
-        self.step = True
-
-    def rendersboard(self):
-        self.step = False
-        self.board = []
-        for boardx in range(0,8):
-            self.board.append([])
-            for boardy in range(0,8):
-                self.board[boardx].append([])
-                for boardz in range(0,8):
-                    self.board[boardx][boardy].append(boardc([boardz+1,boardx+1,boardy+1],self.colour[2][boardx%2][boardy%2][boardz%2]))
-                    self.board[boardx][boardy][boardz].atr['obj'] = loader.loadModel(f'board2.dae')
-                    self.board[boardx][boardy][boardz].atr['obj'].reparentTo(render)
-                    self.board[boardx][boardy][boardz].atr['obj'].setPos(boardx*game.s+game.s,boardy*game.s+0.01+0.5*game.s,boardz*game.s+game.s)
-                    self.board[boardx][boardy][boardz].atr['obj'].setScale(game.hs,game.hs,game.hs)
-                    self.board[boardx][boardy][boardz].atr['obj'].setTexture(self.board[boardx][boardy][boardz].atr['col'])
-                    self.board[boardx][boardy][boardz].atr['obj'].setPythonTag('board',self.board[boardx][boardy][boardz].atr)
-        self.step = True
-
-    def unrendersboard(self):
-        self.step = False
-        for boardx in range(0,8):
-            for boardy in range(0,8):
-                for boardz in range(0,8):
-                    self.board[boardx][boardy][boardz].atr['obj'].removeNode()
-                    time.sleep(0.01)
-        self.step = True
-
-    def rerenders(self,piece):
-        self.step = False
-        piece.atr['obj'] = loader.loadModel(f'{piece.atr["typ"]}.dae')
-        piece.atr['obj'].reparentTo(render)
-        piece.atr['obj'].setPos(piece.atr['pos'][1]*game.s,piece.atr['pos'][2]*game.s,piece.atr['pos'][0]*game.s)
-        piece.atr['obj'].setScale(game.hs,game.hs,game.hs)
-        if piece.atr['col'] == 1:
-            piece.atr['obj'].setTexture(self.colour[0][0], 1)
-            piece.atr['obj'].setHpr(0,0,180)
-        if piece.atr['col'] == -1:
-            piece.atr['obj'].setTexture(self.colour[0][1], 1)
-            piece.atr['obj'].setHpr(0,0,0)
-        piece.atr['obj'].setPythonTag('piece',piece.atr)
-        if piece.atr['pos'][2]-1 >= 0:
-            piece.atr['rel'] = self.board[piece.atr['pos'][1]-1][piece.atr['pos'][2]-1][piece.atr['pos'][0]-1]
-            self.board[piece.atr['pos'][1]-1][piece.atr['pos'][2]-1][piece.atr['pos'][0]-1].atr['rel'] = piece
-        self.step = True
-        self.rendersi(piece.atr,'piece')
-
-    def reunrenders(self,piece):
-        self.step = False
-        piece.atr['obj'].removeNode()
-        time.sleep(0.01)
-        loader.unloadModel(f'{piece.atr["typ"]}.dae')
-        self.step = True
-
-    def rendersi(self,highlightpiece,piecetype):
-        if highlightpiece['ispicked2'] == True:
-            if piecetype == 'piece':
-                if highlightpiece['col'] == 1:
-                    color = self.colour[3][1][0]
-                if highlightpiece['col'] == -1:
-                    color = self.colour[3][1][2]
-            if piecetype == 'board':
-                color = self.colour[3][1][1]
-        if highlightpiece['moved_last_turn'] == True:
-            if highlightpiece['col'] == 1:
-                color = self.colour[3][2][0]
-            if highlightpiece['col'] == -1:
-                color = self.colour[3][2][2]
-        if highlightpiece['ispicked1'] == True:
-            if highlightpiece['col'] == 1:
-                color = self.colour[3][0][0]
-            if highlightpiece['col'] == -1:
-                color = self.colour[3][0][1]
-        if highlightpiece['ispicked1'] == False and highlightpiece['ispicked2'] == False and highlightpiece['moved_last_turn'] == False:
-            if highlightpiece['col'] == 1:
-                color = self.colour[0][0]
-            elif highlightpiece['col'] == -1:
-                color = self.colour[0][1]
-            elif not None in game.moved_from_last_turn:
-                if highlightpiece == self.board[game.moved_from_last_turn[1]-1][game.moved_from_last_turn[2]-1][game.moved_from_last_turn[0]-1].atr:
-                    color = self.colour[3][2][1]
-                else:
-                    color = highlightpiece['col']
-            else:
-                color = highlightpiece['col']
-        highlightpiece['obj'].setTexture(color)
-
-    def click(self):
-        move.ox = 0
-        move.oy = 0
-        move.oz = 0
-        self.reset()
-        try:
-            mpos = base.mouseWatcherNode.getMouse()
-        except:
-            print('You clicked off the screen\n')
-            return
-        self.pickerRay.setFromLens(base.camNode, mpos.getX(), mpos.getY())
-        self.myTraverser.traverse(render)
-        if self.queue.getNumEntries() > 0:
-            self.queue.sortEntries()
-            pickedObj = self.queue.getEntry(0).getIntoNodePath()
-            pickedObj = pickedObj.findNetPythonTag('piece')
-            self.pickedObjp = pickedObj.getNetPythonTag('piece')
-            if self.pickedObjp != None:
-                self.pickedObjp['ispicked1'] = True
-                self.rendersi(self.pickedObjp,'piece')
-                move.ox = self.pickedObjp['pos'][0]
-                move.oy = self.pickedObjp['pos'][1]
-                move.oz = self.pickedObjp['pos'][2]
-
-    def click2(self):
-        move.nx = 0
-        move.ny = 0
-        move.nz = 0
-        self.reset2()
-        try:
-            mpos = base.mouseWatcherNode.getMouse()
-        except:
-            print('You clicked off the screen\n')
-            return
-        self.pickerRay.setFromLens(base.camNode, mpos.getX(), mpos.getY())
-        self.myTraverser.traverse(render)
-        if self.queue.getNumEntries() > 0:
-            self.queue.sortEntries()
-            pickedObj = self.queue.getEntry(0).getIntoNodePath()
-            self.pickedObjc = pickedObj.getNetPythonTag('piece')
-            self.pickedObjb = pickedObj.getNetPythonTag('board')
-            if self.pickedObjb != None or self.pickedObjc != None:
-                if self.pickedObjb != None:
-                    if 'rel' in self.pickedObjb.keys() != None:
-                        self.pickedObjc = self.pickedObjb['rel'].atr
-                        self.pickedObjc['ispicked2'] = True
-                        self.rendersi(self.pickedObjc,'piece')
-                    self.pickedObjb['ispicked2'] = True
-                    self.rendersi(self.pickedObjb,'board')
-                elif self.pickedObjc != None:
-                    if 'rel' in self.pickedObjc.keys() != None:
-                        self.pickedObjb = self.pickedObjc['rel'].atr
-                        self.pickedObjb['ispicked2'] = True
-                        self.rendersi(self.pickedObjb,'board')
-                    self.pickedObjc['ispicked2'] = True
-                    self.rendersi(self.pickedObjc,'piece')
-                if self.pickedObjb != None:
-                    move.nx = self.pickedObjb['pos'][0]
-                    move.ny = self.pickedObjb['pos'][1]
-                    move.nz = self.pickedObjb['pos'][2]
-                else:
-                    move.nx = self.pickedObjc['pos'][0]
-                    move.ny = self.pickedObjc['pos'][1]
-                    move.nz = self.pickedObjc['pos'][2]
-
-    def stuff2(self):
-        self.reset2()
-        if game.gameover == 1 or game.gameover == 2:
-            print('The game is already over!\n')
-            time.sleep(0.1)
-            return
-        self.valid = 1
-        if move.ox == 0 or move.oy == 0 or move.oz == 0:
-            print('You must select a piece to move\n')
-            self.valid = 0
-        elif move.oz < 0:
-            print('You may not move a piece that has already been captured\n')
-            self.valid = 0
-        if move.nx == 0 or move.ny == 0 or move.nz == 0:
-            print('You must select a place to move to\n')
-            self.valid = 0
-        elif move.nz < 0:
-            print('You may not capture a piece that has already been captured\n')
-            self.valid = 0
-        if self.valid == 1:
-            move.findpiece()
-        move.nx = 0
-        move.ny = 0
-        move.nz = 0
-        if hasattr(move,'valid'):
-            if move.valid == 1:
-                self.reset()
-                move.ox = 0
-                move.oy = 0
-                move.oz = 0
-
-    def reset(self):
-        if hasattr(self,'pickedObjp'):
-            if self.pickedObjp != None:
-                self.pickedObjp['ispicked1'] = False
-                self.rendersi(self.pickedObjp,'piece')
-                del self.pickedObjp
-
-    def reset2(self):
-        if hasattr(self,'pickedObjc'):
-            if self.pickedObjc != None:
-                self.pickedObjc['ispicked2'] = False
-                self.rendersi(self.pickedObjc,'piece')
-                del self.pickedObjc
-        if hasattr(self,'pickedObjb'):
-            if self.pickedObjb != None:
-                self.pickedObjb['ispicked2'] = False
-                self.rendersi(self.pickedObjb,'piece')
-                del self.pickedObjb
-
-    def __init__(self):
-        self.nout = MultiplexStream()
-        Notify.ptr().setOstreamPtr(self.nout, 0)
-        self.nout.addFile(Filename("panda3doutput.txt"))
-        ShowBase.__init__(self)
-        render.setShaderAuto()
-        self.disableMouse()
-        self.pickerNode = CollisionNode('mouseRay')
-        self.pickerNP = camera.attachNewNode(self.pickerNode)
-        self.pickerNode.setFromCollideMask(GeomNode.getDefaultCollideMask())
-        self.pickerRay = CollisionRay()
-        self.pickerNode.addSolid(self.pickerRay)
-        self.myTraverser = CollisionTraverser('traverser name')
-        self.queue = CollisionHandlerQueue()
-        self.myTraverser.addCollider(self.pickerNP,self.queue)
-
-        self.colourl2 = {}
-        self.directionalLight = [[45,0,0],[135,0,0],[45,180,0],[135,180,0],[45,30,0],[45,-30,0],[135,30,0],[135,-30,0],[45,150,0],[45,-150,0],[135,150,0],[135,-150,0]]
-        self.directionalLights = []
-        self.directionalLightNP= []
-        self.boards = []
-        self.post = [[4,4],[4,-4],[-4,4],[-4,-4]]
-        self.posts = []
-
-        self.colourl = ['white','black','grid','grid2','brown','darkblue','lightmono','lightred','lightyellow','darkyellow','darkred','darkmono','lightblue','highlightw','highlightb','capturew','captureg','captureb','lastw','lastg','lastb']
-
-        for u in range(0,len(self.colourl)):
-            self.colourl2[f'{self.colourl[u]}'] = loader.loadTexture(f'{home}/static/maps/{self.colourl[u]}.png')
-            self.colourl2[f'{self.colourl[u]}'].setMagfilter(SamplerState.FT_nearest)
-
-        self.colour = [[self.colourl2['white'],self.colourl2['black']],[[self.colourl2['grid'],self.colourl2['grid2']],self.colourl2['brown']],[[[self.colourl2['darkblue'],self.colourl2['lightmono']],[self.colourl2['lightyellow'],self.colourl2['darkred']]],[[self.colourl2['lightred'],self.colourl2['darkyellow']],[self.colourl2['darkmono'],self.colourl2['lightblue']]]],[[self.colourl2['highlightw'],self.colourl2['highlightb']],[self.colourl2['capturew'],self.colourl2['captureg'],self.colourl2['captureb']],[self.colourl2['lastw'],self.colourl2['lastg'],self.colourl2['lastb']]]]
-
-        for u in range(0,12):
-            self.directionalLights.append(DirectionalLight('directionalLight'))
-            self.directionalLights[u].setColor((0.3, 0.3, 0.3, 1))
-            self.directionalLightNP.append(render.attachNewNode(self.directionalLights[u]))
-            self.directionalLightNP[u].setHpr(self.directionalLight[u][0],self.directionalLight[u][1],self.directionalLight[u][2])
-            render.setLight(self.directionalLightNP[u])
-
-        self.rendersboard()
-
-        for u in range(0,8):
-            self.boards.append(loader.loadModel(f'board.dae'))
-            self.boards[u].reparentTo(render)
-            self.boards[u].setPos(game.fs,(u+0.5)*game.s,game.fs)
-            self.boards[u].setScale(game.hs,game.hs,game.hs)
-            self.boards[u].setHpr(0,0,90)
-            self.boards[u].setTexture(self.colour[1][0][u%2])
-
-        for u in range(0,4):
-            self.posts.append(loader.loadModel(f'post.dae'))
-            self.posts[u].reparentTo(render)
-            self.posts[u].setPos(game.fs+self.post[u][0]*game.s,game.s*4,game.fs+self.post[u][1]*game.s)
-            self.posts[u].setScale(game.hs,game.hs,game.hs)
-            self.posts[u].setTexture(self.colour[1][1])
-
-        self.renders()
-
-##
-
 home = "../3dchess"
 
 while True:
@@ -1457,102 +1148,14 @@ while True:
         print('This is not a valid selection\n')
 
 read = read()
-app = MyApp()
 move = movement()
 move.move3 = None
 
 
-## Our terminal thread
-
-inputthread = threading.Thread(target = read.stuff)
-inputthread.start()
-
 
 ## Panda3d task
+#Change name to render
+app = rendering_task(move, game)
+app.start()
 
-camera = cameras.camera(game.s,game.fs)
-camera.init_white()
-
-movement_keylist = ['space','z','w','a','s','d','i','j','k','l']
-hotkey_keylist = ['c','v','mouse1','mouse3','enter']
-keymap = {key:0 for key in movement_keylist+hotkey_keylist}
-
-def setKey(key, value):
-    keymap[key] = value
-
-for key in keymap.keys():
-    if key in movement_keylist:
-        base.accept(key, setKey, [key,1])
-        base.accept(f'{key}-up', setKey, [key,0])
-    if key in hotkey_keylist:
-        base.accept(key, setKey, [key,1])
-
-time_elapsed = 0
-def check_for_input(camera, task):
-    global time_elapsed
-    movement_distance = time_elapsed*20
-    rotation_distance = time_elapsed*14
-
-    if (keymap['space']!=0):
-        camera.move_up(movement_distance)
-
-    if (keymap['z']!=0):
-        camera.move_down(movement_distance)
-
-    if (keymap['w']!=0):
-        camera.move_forward(movement_distance)
-
-    if (keymap['a']!=0):
-        camera.move_left(movement_distance)
-
-    if (keymap['s']!=0):
-        camera.move_back(movement_distance)
-
-    if (keymap['d']!=0):
-        camera.move_right(movement_distance)
-
-    if (keymap['i']!=0):
-        camera.tilt_up(rotation_distance)
-
-    if (keymap['k']!=0):
-        camera.tilt_down(rotation_distance)
-
-    if (keymap['j']!=0):
-        camera.pan_right(rotation_distance)
-
-    if (keymap['l']!=0):
-        camera.pan_left(rotation_distance)
-
-    if (keymap['c']!=0):
-        camera.init_white()
-        setKey('c',0)
-
-    if (keymap['v']!=0):
-        camera.init_black()
-        setKey('v',0)
-
-    if (keymap['mouse1']!=0):
-        app.click()
-        setKey('mouse1',0)
-
-    if (keymap['mouse3']!=0):
-        app.click2()
-        setKey('mouse3',0)
-
-    if (keymap['enter']!=0):
-        app.stuff2()
-        setKey('enter',0)
-
-    time_elapsed = task.time - camera.time_at_last_update
-    camera.update_camera()
-        
-    camera.time_at_last_update = task.time
-    return task.cont
-
-taskMgr.add(check_for_input, 'cameramove', extraArgs=[camera], appendTask=True)
-
-
-while True:
-    if app.step == True:
-        taskMgr.step()
-    time.sleep(0.01)
+read.stuff()
