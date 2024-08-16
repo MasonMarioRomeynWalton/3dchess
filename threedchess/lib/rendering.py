@@ -5,7 +5,7 @@ from panda3d.core import *
 import threading
 import time
 
-from lib import controlable_camera
+from . import controlable_camera
 
 home = "../../3dchess"
 

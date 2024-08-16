@@ -1,2 +1,2 @@
-from lib.camera import *
-from lib.rendering import *
+from .camera import *
+from .rendering import *

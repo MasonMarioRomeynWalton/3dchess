@@ -7,7 +7,7 @@ import traceback
 import time
 from math import *
 
-from lib import rendering_task
+from .lib import rendering_task
 
 ##
 
