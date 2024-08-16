@@ -28,7 +28,13 @@ class rendering_task(threading.Thread):
 
         #To merge
         self.move = move
-        self.init()
+
+        ## initialize the panda3d environment window
+        self.initialize_panda3d_environment()
+
+        self.initialize_all_3d_models()
+
+
 
         ## Create the camera 
         self.camera = controlable_camera(self.game_size,self.multiplied_game_size)
@@ -52,10 +58,84 @@ class rendering_task(threading.Thread):
 
             hotkey_control(  'c',      self.camera.init_white),
             hotkey_control(  'v',      self.camera.init_black),
-            hotkey_control(  'mouse1', self.click),
-            hotkey_control(  'mouse3', self.click2),
+            hotkey_control(  'mouse1', self.select_move_piece),
+            hotkey_control(  'mouse3', self.select_capture_location),
             hotkey_control(  'enter',  self.stuff2)
         ]
+
+    def initialize_panda3d_environment(self):
+        ## Create the error stream
+        ## Unable to find documentation
+        self.nout = MultiplexStream()
+        Notify.ptr().setOstreamPtr(self.nout, 0)
+        self.nout.addFile(Filename("panda3doutput.txt"))
+
+        ## Create panda3d environment
+        base = ShowBase()
+
+        render.setShaderAuto()
+        base.disableMouse()
+        self.pickerNode = CollisionNode('mouseRay')
+        self.pickerNP = camera.attachNewNode(self.pickerNode)
+        self.pickerNode.setFromCollideMask(GeomNode.getDefaultCollideMask())
+        self.pickerRay = CollisionRay()
+        self.pickerNode.addSolid(self.pickerRay)
+        self.myTraverser = CollisionTraverser('traverser name')
+        self.queue = CollisionHandlerQueue()
+        self.myTraverser.addCollider(self.pickerNP,self.queue)
+
+    def initialize_all_3d_models(self):
+        
+        colour_list = []
+        for i in range(0,8):
+            colour_list.append(f'board_{i}')
+
+        for i in range(0,2):
+            colour_list.append(f'player_{i}')
+            colour_list.append(f'move_piece_{i}')
+            colour_list.append(f'capture_piece_{i}')
+            colour_list.append(f'last_moved_piece_{i}')
+
+        colour_list.append(f'grid')
+        colour_list.append('post')
+
+        self.colour_map = {}
+        for colour in colour_list:
+            self.colour_map[colour] = loader.loadTexture(f'{home}/static/maps/{colour}.png')
+            self.colour_map[f'{colour}'].setMagfilter(SamplerState.FT_nearest)
+
+
+        self.directionalLight = [[45,0,0],[135,0,0],[45,180,0],[135,180,0],[45,30,0],[45,-30,0],[135,30,0],[135,-30,0],[45,150,0],[45,-150,0],[135,150,0],[135,-150,0]]
+        self.directionalLights = []
+        self.directionalLightNP= []
+        for u in range(0,12):
+            self.directionalLights.append(DirectionalLight('directionalLight'))
+            self.directionalLights[u].setColor((0.3, 0.3, 0.3, 1))
+            self.directionalLightNP.append(render.attachNewNode(self.directionalLights[u]))
+            self.directionalLightNP[u].setHpr(self.directionalLight[u][0],self.directionalLight[u][1],self.directionalLight[u][2])
+            render.setLight(self.directionalLightNP[u])
+
+        self.boards = []
+        self.deprecated_renders_board()
+
+        for u in range(0,self.game.size_of_dimensions[3]):
+            self.boards.append(loader.loadModel(f'board.dae'))
+            self.boards[u].reparentTo(render)
+            self.boards[u].setPos(self.multiplied_game_size,(u+0.5)*self.game_size,self.multiplied_game_size)
+            self.boards[u].setScale(self.half_game_size,self.half_game_size,self.half_game_size)
+            self.boards[u].setHpr(0,0,90)
+            self.boards[u].setTexture(self.colour_map[f'grid'])
+
+        self.post = [[4,4],[4,-4],[-4,4],[-4,-4]]
+        self.posts = []
+        for u in range(0,4):
+            self.posts.append(loader.loadModel(f'post.dae'))
+            self.posts[u].reparentTo(render)
+            self.posts[u].setPos(self.multiplied_game_size+self.post[u][0]*self.game_size,self.game_size*4,self.multiplied_game_size+self.post[u][1]*self.game_size)
+            self.posts[u].setScale(self.half_game_size,self.half_game_size,self.half_game_size)
+            self.posts[u].setTexture(self.colour_map['post'])
+
+        #self.renders()
 
     def run(self):
         # self.base = ShowBase()
@@ -94,54 +174,52 @@ class rendering_task(threading.Thread):
 
         return task.cont
 
-    def renders(self):
-        self.step = False
-        for u in range (0,len(self.game.pieces)):
-            self.game.pieces[u].atr['obj'] = loader.loadModel(f'{self.game.pieces[u].atr["typ"]}.dae')
-            self.game.pieces[u].atr['obj'].reparentTo(render)
-            self.game.pieces[u].atr['obj'].setPos(self.game.pieces[u].atr['pos'][1]*self.game_size,self.game.pieces[u].atr['pos'][2]*self.game_size,self.game.pieces[u].atr['pos'][0]*self.game_size)
-            self.game.pieces[u].atr['obj'].setScale(self.half_game_size,self.half_game_size,self.half_game_size)
-            if self.game.pieces[u].atr['col'] == 1:
-                self.game.pieces[u].atr['obj'].setTexture(self.colour[0][0], 1)
-                self.game.pieces[u].atr['obj'].setHpr(0,0,180)
-            if self.game.pieces[u].atr['col'] == -1:
-                self.game.pieces[u].atr['obj'].setTexture(self.colour[0][1], 1)
-                self.game.pieces[u].atr['obj'].setHpr(0,0,0)
-            self.game.pieces[u].atr['obj'].setPythonTag('piece',self.game.pieces[u].atr)
-            if self.game.pieces[u].atr['pos'][2]-1 >= 0:
-                self.game.pieces[u].atr['rel'] = self.board[self.game.pieces[u].atr['pos'][1]-1][self.game.pieces[u].atr['pos'][2]-1][self.game.pieces[u].atr['pos'][0]-1]
-                self.board[self.game.pieces[u].atr['pos'][1]-1][self.game.pieces[u].atr['pos'][2]-1][self.game.pieces[u].atr['pos'][0]-1].atr['rel'] = self.game.pieces[u]
-            if self.game.pieces[u].atr['moved_last_turn'] == True:
-                self.rendersi(self.game.pieces[u].atr,'piece')
-        if not None in self.game.moved_from_last_turn:
-            self.board[self.game.moved_from_last_turn[1]-1][self.game.moved_from_last_turn[2]-1][self.game.moved_from_last_turn[0]-1].atr['obj'].setTexture(self.colour[3][2][1])
-        self.step = True
 
-    def unrenders(self):
-        self.step = False
-        for u in range(0,len(self.game.pieces)):
-            self.game.pieces[u].atr['obj'].removeNode()
-            time.sleep(0.01)
-        self.step = True
-
-    def rendersboard(self):
+    def deprecated_renders_board(self):
         self.step = False
         self.board = []
-        for boardx in range(0,8):
-            self.board.append([])
-            for boardy in range(0,8):
-                self.board[boardx].append([])
-                for boardz in range(0,8):
-                    self.board[boardx][boardy].append(boardc([boardz+1,boardx+1,boardy+1],self.colour[2][boardx%2][boardy%2][boardz%2]))
-                    self.board[boardx][boardy][boardz].atr['obj'] = loader.loadModel(f'board2.dae')
-                    self.board[boardx][boardy][boardz].atr['obj'].reparentTo(render)
-                    self.board[boardx][boardy][boardz].atr['obj'].setPos(boardx*self.game_size+self.game_size,boardy*self.game_size+0.01+0.5*self.game_size,boardz*self.game_size+self.game_size)
-                    self.board[boardx][boardy][boardz].atr['obj'].setScale(self.half_game_size,self.half_game_size,self.half_game_size)
-                    self.board[boardx][boardy][boardz].atr['obj'].setTexture(self.board[boardx][boardy][boardz].atr['col'])
-                    self.board[boardx][boardy][boardz].atr['obj'].setPythonTag('board',self.board[boardx][boardy][boardz].atr)
+        self.renders_board(self.board, [0,0,0], self.game.dimensions)
         self.step = True
 
-    def unrendersboard(self):
+    def renders_board(self, board, pos, dimensions):
+        ## renders the board
+        if dimensions == 0:
+            colour = self.calculate_colour_index(pos)
+            board_segment = board_segment_render(pos, self.colour_map[f'board_{colour}'])
+
+            board_segment.obj = loader.loadModel(f'board2.dae')
+            board_segment.obj.reparentTo(render)
+            board_segment.obj.setPos(pos[0]*self.game_size+self.game_size,pos[2]*self.game_size+0.01+0.5*self.game_size,pos[1]*self.game_size+self.game_size)
+            board_segment.obj.setScale(self.half_game_size,self.half_game_size,self.half_game_size)
+            board_segment.obj.setTexture(board_segment.col)
+            board_segment.obj.setPythonTag('board',board_segment)
+
+        else:
+            for sub_board in range(0,self.game.size_of_dimensions[dimensions]):
+                board.append([])
+                sub_board_pos = pos.copy()
+                sub_board_pos[dimensions-1] = sub_board
+                self.renders_board(board[-1], sub_board_pos, dimensions-1)
+
+    def calculate_colour_index(self, pos):
+        ## This is not possible in higher dimensions
+        ## Cardinals can move to all squares on the board in 4d chess
+
+        if self.game.dimensions == 1:
+            colour_index = 0
+
+        elif self.game.dimensions == 3:
+            colour_index = (pos[0]%2+(pos[1]%2)*2+(pos[2]%2)*4)%8
+
+        else:
+            colour_index = sum(pos)%2
+            if colour_index == 1:
+                colour_index = 7
+
+        return colour_index
+            
+
+    def unrenders_board(self):
         self.step = False
         for boardx in range(0,8):
             for boardy in range(0,8):
@@ -150,17 +228,49 @@ class rendering_task(threading.Thread):
                     time.sleep(0.01)
         self.step = True
 
+    def renders(self):
+        ## renders all the pieces
+        self.step = False
+        for u in range (0,len(self.game.pieces)):
+            self.game.pieces[u].atr['obj'] = loader.loadModel(f'{self.game.pieces[u].atr["typ"]}.dae')
+            self.game.pieces[u].atr['obj'].reparentTo(render)
+            self.game.pieces[u].atr['obj'].setPos(self.game.pieces[u].atr['pos'][1]*self.game_size,self.game.pieces[u].atr['pos'][2]*self.game_size,self.game.pieces[u].atr['pos'][0]*self.game_size)
+            self.game.pieces[u].atr['obj'].setScale(self.half_game_size,self.half_game_size,self.half_game_size)
+            if self.game.pieces[u].atr['col'] == 0:
+                self.game.pieces[u].atr['obj'].setTexture(self.colour_map[f'player_0'], 1)
+                self.game.pieces[u].atr['obj'].setHpr(0,0,180)
+            if self.game.pieces[u].atr['col'] == 1:
+                self.game.pieces[u].atr['obj'].setTexture(self.colour_map[f'player_1'], 1)
+                self.game.pieces[u].atr['obj'].setHpr(0,0,0)
+
+            self.game.pieces[u].atr['obj'].setPythonTag('piece',self.game.pieces[u].atr)
+            if self.game.pieces[u].atr['pos'][2]-1 >= 0:
+                self.game.pieces[u].atr['rel'] = self.board[self.game.pieces[u].atr['pos'][1]-1][self.game.pieces[u].atr['pos'][2]-1][self.game.pieces[u].atr['pos'][0]-1]
+                self.board[self.game.pieces[u].atr['pos'][1]-1][self.game.pieces[u].atr['pos'][2]-1][self.game.pieces[u].atr['pos'][0]-1].atr['rel'] = self.game.pieces[u]
+            if self.game.pieces[u].atr['moved_last_turn'] == True:
+                self.rendersi(self.game.pieces[u].atr,'piece')
+        if not None in self.game.moved_from_last_turn:
+            self.board[self.game.moved_from_last_turn[1]-1][self.game.moved_from_last_turn[2]-1][self.game.moved_from_last_turn[0]-1].atr['obj'].setTexture(self.colour_map['last_moved_board'])
+        self.step = True
+
+    def unrenders(self):
+        ## unrenders all the pieces
+        self.step = False
+        for u in range(0,len(self.game.pieces)):
+            self.game.pieces[u].atr['obj'].removeNode()
+            time.sleep(0.01)
+        self.step = True
     def rerenders(self,piece):
         self.step = False
         piece.atr['obj'] = loader.loadModel(f'{piece.atr["typ"]}.dae')
         piece.atr['obj'].reparentTo(render)
         piece.atr['obj'].setPos(piece.atr['pos'][1]*self.game_size,piece.atr['pos'][2]*self.game_size,piece.atr['pos'][0]*self.game_size)
         piece.atr['obj'].setScale(self.half_game_size,self.half_game_size,self.half_game_size)
-        if piece.atr['col'] == 1:
-            piece.atr['obj'].setTexture(self.colour[0][0], 1)
+        if piece.atr['col'] == 0:
+            piece.atr['obj'].setTexture(self.colourmap['piece_0'], 1)
             piece.atr['obj'].setHpr(0,0,180)
-        if piece.atr['col'] == -1:
-            piece.atr['obj'].setTexture(self.colour[0][1], 1)
+        if piece.atr['col'] == 1:
+            piece.atr['obj'].setTexture(self.colourmap['piece_1'], 1)
             piece.atr['obj'].setHpr(0,0,0)
         piece.atr['obj'].setPythonTag('piece',piece.atr)
         if piece.atr['pos'][2]-1 >= 0:
@@ -179,37 +289,37 @@ class rendering_task(threading.Thread):
     def rendersi(self,highlightpiece,piecetype):
         if highlightpiece['ispicked2'] == True:
             if piecetype == 'piece':
+                if highlightpiece['col'] == 0:
+                    color = self.colour_map['capture_piece_0']
                 if highlightpiece['col'] == 1:
-                    color = self.colour[3][1][0]
-                if highlightpiece['col'] == -1:
-                    color = self.colour[3][1][2]
+                    color = self.colour_map['capture_piece_1']
             if piecetype == 'board':
-                color = self.colour[3][1][1]
+                color = self.colour_map['capture_board']
         if highlightpiece['moved_last_turn'] == True:
+            if highlightpiece['col'] == 0:
+                color = self.colour_map['last_moved_piece_0']
             if highlightpiece['col'] == 1:
-                color = self.colour[3][2][0]
-            if highlightpiece['col'] == -1:
-                color = self.colour[3][2][2]
+                color = self.colour_map['last_moved_piece_1']
         if highlightpiece['ispicked1'] == True:
+            if highlightpiece['col'] == 0:
+                color = self.colour_map['move_piece_0']
             if highlightpiece['col'] == 1:
-                color = self.colour[3][0][0]
-            if highlightpiece['col'] == -1:
-                color = self.colour[3][0][1]
+                color = self.colour_map['move_piece_1']
         if highlightpiece['ispicked1'] == False and highlightpiece['ispicked2'] == False and highlightpiece['moved_last_turn'] == False:
-            if highlightpiece['col'] == 1:
-                color = self.colour[0][0]
-            elif highlightpiece['col'] == -1:
-                color = self.colour[0][1]
+            if highlightpiece['col'] == 0:
+                color = self.colour_map['player_0']
+            elif highlightpiece['col'] == 1:
+                color = self.colour_map['player_1']
             elif not None in self.game.moved_from_last_turn:
                 if highlightpiece == self.board[self.game.moved_from_last_turn[1]-1][self.game.moved_from_last_turn[2]-1][self.game.moved_from_last_turn[0]-1].atr:
-                    color = self.colour[3][2][1]
+                    color = self.colour_map['last_moved_board']
                 else:
-                    color = highlightpiece['col']
+                    color = highlightpiece.col
             else:
-                color = highlightpiece['col']
+                color = highlightpiece.col
         highlightpiece['obj'].setTexture(color)
 
-    def click(self):
+    def select_move_piece(self):
         #Change to move(x,y,z)
         self.move.ox = 0
         self.move.oy = 0
@@ -234,7 +344,8 @@ class rendering_task(threading.Thread):
                 self.move.oy = self.pickedObjp['pos'][1]
                 self.move.oz = self.pickedObjp['pos'][2]
 
-    def click2(self):
+    def select_capture_location(self):
+        print('select_capture_location')
         self.move.nx = 0
         self.move.ny = 0
         self.move.nz = 0
@@ -247,6 +358,7 @@ class rendering_task(threading.Thread):
         self.pickerRay.setFromLens(base.camNode, mpos.getX(), mpos.getY())
         self.myTraverser.traverse(render)
         if self.queue.getNumEntries() > 0:
+            print('picked something')
             self.queue.sortEntries()
             pickedObj = self.queue.getEntry(0).getIntoNodePath()
             self.pickedObjc = pickedObj.getNetPythonTag('piece')
@@ -325,67 +437,9 @@ class rendering_task(threading.Thread):
                 self.rendersi(self.pickedObjb,'piece')
                 del self.pickedObjb
 
-    def init(self):
+
+
         
-        self.nout = MultiplexStream()
-        Notify.ptr().setOstreamPtr(self.nout, 0)
-        self.nout.addFile(Filename("panda3doutput.txt"))
-
-        #ShowBase.__init__(self)
-        base = ShowBase()
-
-        render.setShaderAuto()
-        base.disableMouse()
-        self.pickerNode = CollisionNode('mouseRay')
-        self.pickerNP = camera.attachNewNode(self.pickerNode)
-        self.pickerNode.setFromCollideMask(GeomNode.getDefaultCollideMask())
-        self.pickerRay = CollisionRay()
-        self.pickerNode.addSolid(self.pickerRay)
-        self.myTraverser = CollisionTraverser('traverser name')
-        self.queue = CollisionHandlerQueue()
-        self.myTraverser.addCollider(self.pickerNP,self.queue)
-
-        self.colourl2 = {}
-        self.directionalLight = [[45,0,0],[135,0,0],[45,180,0],[135,180,0],[45,30,0],[45,-30,0],[135,30,0],[135,-30,0],[45,150,0],[45,-150,0],[135,150,0],[135,-150,0]]
-        self.directionalLights = []
-        self.directionalLightNP= []
-        self.boards = []
-        self.post = [[4,4],[4,-4],[-4,4],[-4,-4]]
-        self.posts = []
-
-        self.colourl = ['white','black','grid','grid2','brown','darkblue','lightmono','lightred','lightyellow','darkyellow','darkred','darkmono','lightblue','highlightw','highlightb','capturew','captureg','captureb','lastw','lastg','lastb']
-
-        for u in range(0,len(self.colourl)):
-            self.colourl2[f'{self.colourl[u]}'] = loader.loadTexture(f'{home}/static/maps/{self.colourl[u]}.png')
-            self.colourl2[f'{self.colourl[u]}'].setMagfilter(SamplerState.FT_nearest)
-
-        self.colour = [[self.colourl2['white'],self.colourl2['black']],[[self.colourl2['grid'],self.colourl2['grid2']],self.colourl2['brown']],[[[self.colourl2['darkblue'],self.colourl2['lightmono']],[self.colourl2['lightyellow'],self.colourl2['darkred']]],[[self.colourl2['lightred'],self.colourl2['darkyellow']],[self.colourl2['darkmono'],self.colourl2['lightblue']]]],[[self.colourl2['highlightw'],self.colourl2['highlightb']],[self.colourl2['capturew'],self.colourl2['captureg'],self.colourl2['captureb']],[self.colourl2['lastw'],self.colourl2['lastg'],self.colourl2['lastb']]]]
-
-        for u in range(0,12):
-            self.directionalLights.append(DirectionalLight('directionalLight'))
-            self.directionalLights[u].setColor((0.3, 0.3, 0.3, 1))
-            self.directionalLightNP.append(render.attachNewNode(self.directionalLights[u]))
-            self.directionalLightNP[u].setHpr(self.directionalLight[u][0],self.directionalLight[u][1],self.directionalLight[u][2])
-            render.setLight(self.directionalLightNP[u])
-
-        self.rendersboard()
-
-        for u in range(0,8):
-            self.boards.append(loader.loadModel(f'board.dae'))
-            self.boards[u].reparentTo(render)
-            self.boards[u].setPos(self.multiplied_game_size,(u+0.5)*self.game_size,self.multiplied_game_size)
-            self.boards[u].setScale(self.half_game_size,self.half_game_size,self.half_game_size)
-            self.boards[u].setHpr(0,0,90)
-            self.boards[u].setTexture(self.colour[1][0][u%2])
-
-        for u in range(0,4):
-            self.posts.append(loader.loadModel(f'post.dae'))
-            self.posts[u].reparentTo(render)
-            self.posts[u].setPos(self.multiplied_game_size+self.post[u][0]*self.game_size,self.game_size*4,self.multiplied_game_size+self.post[u][1]*self.game_size)
-            self.posts[u].setScale(self.half_game_size,self.half_game_size,self.half_game_size)
-            self.posts[u].setTexture(self.colour[1][1])
-
-        self.renders()
 
 class key_control():
     def __init__(self, key, function):
@@ -418,6 +472,19 @@ class hotkey_control(key_control):
         self.function()
         self.setKey(0)
 
-class boardc:
+class board_segment_render():
     def __init__(self,pos,col):
-        self.atr = {'pos':pos,'col':col,'moved_last_turn':False,'ispicked1':False,'ispicked2':False}
+        self.pos = pos
+        self.col = col
+        self.moved_last_turn = False
+        self.ispicked1 = False
+        self.ispicked2 = False
+
+
+class piece_render():
+    def __init__():
+        self.is_picked1 = False
+        self.is_picked2 = False
+
+
+

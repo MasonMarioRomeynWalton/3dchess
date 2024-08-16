@@ -6,6 +6,8 @@ change check if to far away function to middle of the board
 figure out who "press any key to" doesn't work
 
 finish mergeing rendering class/ should be able to run two different panda3ds simultaneously and have both update at the same time 
+make bottom of the board procedurally genarated
+make posts variable height
 make file for command line and make it main thread/ read -> command_line
 make file for a movement with a boolean for castling/capturing
 
@@ -34,5 +36,8 @@ make 3dchess lite
 
 make castling lite
 
+Make piece placement automatic for NxM board
+
 Add possible piece locations in ponk
 Add check. Turn  king (purple/orange)
+
