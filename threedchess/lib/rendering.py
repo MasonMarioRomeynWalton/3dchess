@@ -18,7 +18,7 @@ class rendering_task(threading.Thread):
         self.game = game
 
         ## How big the game board is
-        self.game_size = 5
+        self.game_size = 2
 
         ## Half of the game board size
         self.half_game_size = self.game_size/2
@@ -32,7 +32,7 @@ class rendering_task(threading.Thread):
         ## initialize the panda3d environment window
         self.initialize_panda3d_environment()
 
-        self.initialize_all_3d_models()
+        self.render_all_3d_models()
 
 
 
@@ -58,10 +58,13 @@ class rendering_task(threading.Thread):
 
             hotkey_control(  'c',      self.camera.init_white),
             hotkey_control(  'v',      self.camera.init_black),
+            hotkey_control(  'f',      self.camera.init_center),
             hotkey_control(  'mouse1', self.select_move_piece),
             hotkey_control(  'mouse3', self.select_capture_location),
             hotkey_control(  'enter',  self.stuff2)
         ]
+
+        self.step = True
 
     def initialize_panda3d_environment(self):
         ## Create the error stream
@@ -84,7 +87,7 @@ class rendering_task(threading.Thread):
         self.queue = CollisionHandlerQueue()
         self.myTraverser.addCollider(self.pickerNP,self.queue)
 
-    def initialize_all_3d_models(self):
+    def render_all_3d_models(self):
         
         colour_list = []
         for i in range(0,8):
@@ -96,7 +99,7 @@ class rendering_task(threading.Thread):
             colour_list.append(f'capture_piece_{i}')
             colour_list.append(f'last_moved_piece_{i}')
 
-        colour_list.append(f'grid')
+        colour_list.append('grid')
         colour_list.append('post')
 
         self.colour_map = {}
@@ -115,93 +118,103 @@ class rendering_task(threading.Thread):
             self.directionalLightNP[u].setHpr(self.directionalLight[u][0],self.directionalLight[u][1],self.directionalLight[u][2])
             render.setLight(self.directionalLightNP[u])
 
+        self.render_posts()
+
         self.boards = []
-        self.deprecated_renders_board()
 
-        for u in range(0,self.game.size_of_dimensions[3]):
-            self.boards.append(loader.loadModel(f'board.dae'))
-            self.boards[u].reparentTo(render)
-            self.boards[u].setPos(self.multiplied_game_size,(u+0.5)*self.game_size,self.multiplied_game_size)
-            self.boards[u].setScale(self.half_game_size,self.half_game_size,self.half_game_size)
-            self.boards[u].setHpr(0,0,90)
-            self.boards[u].setTexture(self.colour_map[f'grid'])
-
-        self.post = [[4,4],[4,-4],[-4,4],[-4,-4]]
-        self.posts = []
-        for u in range(0,4):
-            self.posts.append(loader.loadModel(f'post.dae'))
-            self.posts[u].reparentTo(render)
-            self.posts[u].setPos(self.multiplied_game_size+self.post[u][0]*self.game_size,self.game_size*4,self.multiplied_game_size+self.post[u][1]*self.game_size)
-            self.posts[u].setScale(self.half_game_size,self.half_game_size,self.half_game_size)
-            self.posts[u].setTexture(self.colour_map['post'])
+        self.board = []
+        self.renders_board(self.board, [0,0,0], self.game.dimensions)
 
         #self.renders()
 
-    def run(self):
-        # self.base = ShowBase()
-        self.app = MyApp(game)
+    def render_generic_object(self, model, texture, position = [0,0,0], rotation = [0,0,0], scale = [1,1,1]):
+        rendered_object = loader.loadModel(model)
+        rendered_object.reparentTo(render)
+
+        rendered_object.setPos(
+            position[0]*self.game_size,
+            position[2]*self.game_size,
+            position[1]*self.game_size
+        )
+
+        rendered_object.setScale(
+            scale[0],
+            scale[2],
+            scale[1]
+        )
+
+        rendered_object.setHpr(
+            rotation[0],
+            rotation[1],
+            rotation[2]
+        )
+
+        if texture != None:
+            rendered_object.setTexture(self.colour_map[texture])
+
+        return rendered_object
 
 
-        self.start()
+    def render_posts(self):
+        post_locations = [
+            [4,4,0],
+            [4,-4,0],
+            [-4,4,0],
+            [-4,-4,0]
+        ]
+
+        self.posts = []
+
+        for post_location in post_locations:
+            self.posts.append(self.render_generic_object(
+                'post.dae',
+                'post',
+                post_location,
+                scale = [1,1,self.game.size_of_dimensions[2]-0.5]
+            ))
 
 
-    def start(self):
-
-        taskMgr.add(self.check_for_input, 'cameramove', extraArgs=[self.camera], appendTask=True)
-
-        while True:
-            if self.step == True:
-                taskMgr.step()
-            time.sleep(0.01)
-
-    def check_for_input(self, camera, task):
-        movement_distance = self.time_elapsed*20
-        rotation_distance = self.time_elapsed*14
-
-        for control in self.controls:
-            if control.pressed == 1:
-                if type(control) == movement_control:
-                    if control.movement_type == "move":
-                        control.key_press(movement_distance)
-                    if control.movement_type == "rotate":
-                        control.key_press(rotation_distance)
-                if type(control) == hotkey_control:
-                    control.key_press()
-
-        self.time_elapsed = task.time - self.camera.time_at_last_update
-        self.camera.update_camera()
-        self.camera.time_at_last_update = task.time
-
-        return task.cont
-
-
-    def deprecated_renders_board(self):
-        self.step = False
-        self.board = []
-        self.renders_board(self.board, [0,0,0], self.game.dimensions)
-        self.step = True
-
-    def renders_board(self, board, pos, dimensions):
+    def renders_board(self, board, game_pos, dimensions):
         ## renders the board
         if dimensions == 0:
-            colour = self.calculate_colour_index(pos)
-            board_segment = board_segment_render(pos, self.colour_map[f'board_{colour}'])
+            top_colour = self.calculate_top_colour(game_pos)
+            bottom_colour = self.calculate_bottom_colour(game_pos)
 
-            board_segment.obj = loader.loadModel(f'board2.dae')
-            board_segment.obj.reparentTo(render)
-            board_segment.obj.setPos(pos[0]*self.game_size+self.game_size,pos[2]*self.game_size+0.01+0.5*self.game_size,pos[1]*self.game_size+self.game_size)
-            board_segment.obj.setScale(self.half_game_size,self.half_game_size,self.half_game_size)
-            board_segment.obj.setTexture(board_segment.col)
-            board_segment.obj.setPythonTag('board',board_segment)
+            board_segment = board_segment_render(
+                game_pos,
+                self.colour_map[f'board_{top_colour}']
+            )
+
+            
+            rendering_pos = []
+            for i in range(0,self.game.dimensions):
+                rendering_pos.append(game_pos[i]-(self.game.size_of_dimensions[i]-1)/2)
+                    
+            board_segment.obj = self.render_generic_object(
+                'board_piece.dae',
+                f'board_{top_colour}',
+                rendering_pos
+            )
+
+            rendering_pos[2] = rendering_pos[2] - 0.001
+
+
+            board_segment.bottom = self.render_generic_object(
+                'board_piece.dae',
+                None,
+                rendering_pos
+            )
+
+            board_segment.bottom.setColorScale(bottom_colour[0],bottom_colour[1],bottom_colour[2],0)
 
         else:
-            for sub_board in range(0,self.game.size_of_dimensions[dimensions]):
+            for sub_board in range(0,self.game.size_of_dimensions[dimensions-1]):
                 board.append([])
-                sub_board_pos = pos.copy()
+                sub_board_pos = game_pos.copy()
                 sub_board_pos[dimensions-1] = sub_board
                 self.renders_board(board[-1], sub_board_pos, dimensions-1)
 
-    def calculate_colour_index(self, pos):
+    def calculate_top_colour(self, pos):
         ## This is not possible in higher dimensions
         ## Cardinals can move to all squares on the board in 4d chess
 
@@ -217,7 +230,13 @@ class rendering_task(threading.Thread):
                 colour_index = 7
 
         return colour_index
-            
+
+    def calculate_bottom_colour(self, pos):
+        colour = [0,0,0]
+        for i in range(0,self.game.dimensions):
+            colour[i] = pos[i]/self.game.size_of_dimensions[i]
+
+        return colour
 
     def unrenders_board(self):
         self.step = False
@@ -252,6 +271,12 @@ class rendering_task(threading.Thread):
         if not None in self.game.moved_from_last_turn:
             self.board[self.game.moved_from_last_turn[1]-1][self.game.moved_from_last_turn[2]-1][self.game.moved_from_last_turn[0]-1].atr['obj'].setTexture(self.colour_map['last_moved_board'])
         self.step = True
+
+    def reset():
+        self.unrenders()
+        self.unrenders_board()
+        self.renders_board(self.board, [0,0,0], self.game.dimensions)
+        self.renders()
 
     def unrenders(self):
         ## unrenders all the pieces
@@ -418,7 +443,7 @@ class rendering_task(threading.Thread):
                 self.move.oy = 0
                 self.move.oz = 0
 
-    def reset(self):
+    def reset_piece_colour(self):
         if hasattr(self,'pickedObjp'):
             if self.pickedObjp != None:
                 self.pickedObjp['ispicked1'] = False
@@ -436,6 +461,43 @@ class rendering_task(threading.Thread):
                 self.pickedObjb['ispicked2'] = False
                 self.rendersi(self.pickedObjb,'piece')
                 del self.pickedObjb
+
+    def run(self):
+        # self.base = ShowBase()
+        self.app = MyApp(game)
+
+
+        self.start()
+
+
+    def start(self):
+
+        taskMgr.add(self.check_for_input, 'cameramove', extraArgs=[self.camera], appendTask=True)
+
+        while True:
+            if self.step == True:
+                taskMgr.step()
+            time.sleep(0.01)
+
+    def check_for_input(self, camera, task):
+        movement_distance = self.time_elapsed*20
+        rotation_distance = self.time_elapsed*14
+
+        for control in self.controls:
+            if control.pressed == 1:
+                if type(control) == movement_control:
+                    if control.movement_type == "move":
+                        control.key_press(movement_distance)
+                    if control.movement_type == "rotate":
+                        control.key_press(rotation_distance)
+                if type(control) == hotkey_control:
+                    control.key_press()
+
+        self.time_elapsed = task.time - self.camera.time_at_last_update
+        self.camera.update_camera()
+        self.camera.time_at_last_update = task.time
+
+        return task.cont
 
 
 

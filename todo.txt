@@ -1,13 +1,8 @@
-make quit function
-make captured pieces a different color(purple or orange)
-make last captured piece cyan
-change camera movement to the mouse
-change check if to far away function to middle of the board
-figure out who "press any key to" doesn't work
 
-finish mergeing rendering class/ should be able to run two different panda3ds simultaneously and have both update at the same time 
 make bottom of the board procedurally genarated
 make posts variable height
+finish mergeing rendering class/ should be able to run two different panda3ds simultaneously and have both update at the same time 
+
 make file for command line and make it main thread/ read -> command_line
 make file for a movement with a boolean for castling/capturing
 
@@ -19,6 +14,24 @@ make file for game logic
 finish the logic for the movement of the pieces
 merge main.py with client.py
 make git repo for the backend
+
+###
+
+QOL:
+
+make quit function
+make captured pieces a different color(purple or orange)
+make last captured piece cyan
+change camera movement to the mouse
+change check if to far away function to middle of the board
+figure out who "press any key to" doesn't work
+
+Add possible piece locations in ponk
+Add check. Turn  king (purple/orange)
+
+###
+
+New:
 
 make n-dimesional chess
 make n-dimensional pieces
@@ -38,6 +51,4 @@ make castling lite
 
 Make piece placement automatic for NxM board
 
-Add possible piece locations in ponk
-Add check. Turn  king (purple/orange)
 

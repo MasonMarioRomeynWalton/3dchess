@@ -30,7 +30,7 @@ class game():
     def restart(self):
 
         self.dimensions = 3
-        self.size_of_dimensions = [0,20,2,4]
+        self.size_of_dimensions = [2,80,2]
 
         print('Controls:')
         print('Space to go up')

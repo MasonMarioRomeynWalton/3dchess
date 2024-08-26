@@ -8,7 +8,21 @@ class controlable_camera():
         ## How big the game board is
         self.game_size = game_size
         self.game_size_multiplier = game_size_multiplier
+        
+        ## How far up or down the camera is tilted
+        self.pitch = 0
 
+        ## How far left or right the camera is tilted
+        self.yaw = 0
+
+        ## How far left or right the camera is
+        self.x_pos = 0
+
+        ## How far up or down the camera is
+        self.y_pos = 0
+
+        ## How far in or out the camera is
+        self.z_pos = 0
         
         ## The time since the last camera update
         self.time_at_last_update = 0
@@ -18,19 +32,10 @@ class controlable_camera():
         Initializes the camera for the white player
         """
 
-        ## How far up or down the camera is tilted
         self.pitch = pi/2
-
-        ## How far left or right the camera is tilted
         self.yaw = -pi/2
-
-        ## How far left or right the camera is
         self.x_pos = -30
-
-        ## How far up or down the camera is
         self.y_pos = 22.5
-
-        ## How far in or out the camera is
         self.z_pos = 22.5
 
         self.update_camera()
@@ -40,22 +45,27 @@ class controlable_camera():
         Initializes the camera for the black player
         """
 
-        ## How far up or down the camera is tilted
         self.pitch = pi/2
-
-        ## How far left or right the camera is tilted
         self.yaw = pi/2
-
-        ## How far left or right the camera is
         self.x_pos = 75
-
-        ## How far up or down the camera is
         self.y_pos = 22.5
-
-        ## How far in or out the camera is
         self.z_pos = 22.5
 
         self.update_camera()
+
+    def init_center(self):
+        """
+        Initializes the camera for the center
+        """
+
+        self.pitch = 0
+        self.yaw = 0
+        self.x_pos = 0
+        self.y_pos = 0
+        self.z_pos = 0
+
+        self.update_camera()
+
 
     def update_camera(self):
         """
