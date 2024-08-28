@@ -3,11 +3,16 @@ from panda3d.core import LVecBase4f, LMatrix4f
 from math import *
 
 class controlable_camera():
-    def __init__(self,game_size,game_size_multiplier):
+    def __init__(self, game_size, movement_speed, rotation_speed):
 
-        ## How big the game board is
+        ## How fast the camera moves
+        self.movement_speed = movement_speed
+
+        ## How fast the camera rotates
+        self.rotation_speed = rotation_speed
+
+        ## The maximum distance the camera can be from the center
         self.game_size = game_size
-        self.game_size_multiplier = game_size_multiplier
         
         ## How far up or down the camera is tilted
         self.pitch = 0
@@ -34,9 +39,9 @@ class controlable_camera():
 
         self.pitch = pi/2
         self.yaw = -pi/2
-        self.x_pos = -30
-        self.y_pos = 22.5
-        self.z_pos = 22.5
+        self.x_pos = -(self.game_size*2+1)
+        self.y_pos = 0
+        self.z_pos = 0
 
         self.update_camera()
 
@@ -119,7 +124,7 @@ class controlable_camera():
             distance (float): How far to move the camera upwards
         """
 
-        self.y_pos = self.y_pos+distance
+        self.y_pos = self.y_pos+distance*self.movement_speed
         self.check_distance_away()
 
     def move_down(self,distance):
@@ -130,7 +135,7 @@ class controlable_camera():
             distance (float): How far to move the camera downwards
         """
 
-        self.y_pos = self.y_pos-distance
+        self.y_pos = self.y_pos-distance*self.movement_speed
         self.check_distance_away()
 
     def move_forward(self,distance):
@@ -140,8 +145,8 @@ class controlable_camera():
             distance (float): How far to move the camera forward
         """
 
-        self.z_pos = self.z_pos-cos(self.yaw)*distance
-        self.x_pos = self.x_pos-sin(self.yaw)*distance
+        self.z_pos = self.z_pos-cos(self.yaw)*distance*self.movement_speed
+        self.x_pos = self.x_pos-sin(self.yaw)*distance*self.movement_speed
         self.check_distance_away()
 
     def move_backward(self,distance):
@@ -151,8 +156,8 @@ class controlable_camera():
             distance (float): How far to move the camera backwards
         """
 
-        self.z_pos = self.z_pos+cos(self.yaw)*distance
-        self.x_pos = self.x_pos+sin(self.yaw)*distance
+        self.z_pos = self.z_pos+cos(self.yaw)*distance*self.movement_speed
+        self.x_pos = self.x_pos+sin(self.yaw)*distance*self.movement_speed
         self.check_distance_away()
 
     def move_left(self,distance):
@@ -162,8 +167,8 @@ class controlable_camera():
             distance (float): How far to move the camera left
         """
 
-        self.x_pos = self.x_pos-cos(self.yaw)*distance
-        self.z_pos = self.z_pos+sin(self.yaw)*distance
+        self.x_pos = self.x_pos-cos(self.yaw)*distance*self.movement_speed
+        self.z_pos = self.z_pos+sin(self.yaw)*distance*self.movement_speed
         self.check_distance_away()
 
     def move_right(self,distance):
@@ -173,8 +178,8 @@ class controlable_camera():
             distance (float): How far to move the camera right
         """
 
-        self.x_pos = self.x_pos+cos(self.yaw)*distance
-        self.z_pos = self.z_pos-sin(self.yaw)*distance
+        self.x_pos = self.x_pos+cos(self.yaw)*distance*self.movement_speed
+        self.z_pos = self.z_pos-sin(self.yaw)*distance*self.movement_speed
         self.check_distance_away()
 
     def tilt_up(self,distance):
@@ -185,7 +190,7 @@ class controlable_camera():
         """
 
         if self.pitch > 0:
-            self.pitch = self.pitch-distance*pi/32
+            self.pitch = self.pitch-distance*self.rotation_speed
 
     def tilt_down(self,distance):
         """Tilts the camera down by the given distance
@@ -195,7 +200,7 @@ class controlable_camera():
         """
 
         if self.pitch < pi:
-            self.pitch = self.pitch+distance*pi/32
+            self.pitch = self.pitch+distance*self.rotation_speed
 
     def pan_left(self,distance):
         """Pans the camera right by the given distance
@@ -204,7 +209,7 @@ class controlable_camera():
             distance (float): How far to pan the camera right
         """
 
-        self.yaw = self.yaw+distance*pi/32
+        self.yaw = self.yaw+distance*self.rotation_speed
 
     def pan_right(self,distance):
         """Pans the camera left by the given distance
@@ -213,7 +218,7 @@ class controlable_camera():
             distance (float): How far to pan the camera left
         """
 
-        self.yaw = self.yaw - distance*pi/32
+        self.yaw = self.yaw-distance*self.rotation_speed
 
     def check_distance_away(self):
         """Checks if the camera is too far away
@@ -223,7 +228,7 @@ class controlable_camera():
 
         """
         distance = sqrt(self.x_pos**2+self.y_pos**2+self.z_pos**2)
-        max_distance = 28*self.game_size+self.game_size_multiplier
+        max_distance = self.game_size*4+2
         if distance > max_distance:
             self.init_white()
 

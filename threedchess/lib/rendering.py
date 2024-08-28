@@ -4,6 +4,7 @@ from panda3d.core import *
 
 import threading
 import time
+import itertools
 
 from . import controlable_camera
 
@@ -17,27 +18,26 @@ class rendering_task(threading.Thread):
         ## The game object
         self.game = game
 
-        ## How big the game board is
-        self.game_size = 2
-
-        ## Half of the game board size
-        self.half_game_size = self.game_size/2
-
-        ## Multiplier of the game board size
-        self.multiplied_game_size = self.game_size*4.5
-
         #To merge
         self.move = move
 
         ## initialize the panda3d environment window
         self.initialize_panda3d_environment()
 
+        ## Render all of the 3d models
         self.render_all_3d_models()
 
 
 
+        ## The maximum distance the camera can be from the board
+        max_distance_away = max(
+            self.game.size_of_dimensions[0],
+            self.game.size_of_dimensions[1],
+            self.game.size_of_dimensions[2]
+        )
+
         ## Create the camera 
-        self.camera = controlable_camera(self.game_size,self.multiplied_game_size)
+        self.camera = controlable_camera(max_distance_away,1,0.15)
         self.camera.init_white()
 
         ## Set the amount of time since the last camera update to 0
@@ -127,20 +127,24 @@ class rendering_task(threading.Thread):
 
         #self.renders()
 
-    def render_generic_object(self, model, texture, position = [0,0,0], rotation = [0,0,0], scale = [1,1,1]):
+    def render_generic_object(self, model, texture, game_position = [0,0,0], rotation = [0,0,0], scale = [1,1,1]):
         rendered_object = loader.loadModel(model)
         rendered_object.reparentTo(render)
 
+        rendering_position = []
+        for i in range(0,self.game.dimensions):
+            rendering_position.append(game_position[i]-(self.game.size_of_dimensions[i]-1)/2)
+
         rendered_object.setPos(
-            position[0]*self.game_size,
-            position[2]*self.game_size,
-            position[1]*self.game_size
+            rendering_position[0],
+            rendering_position[2],
+            rendering_position[1]
         )
 
         rendered_object.setScale(
-            scale[0],
-            scale[2],
-            scale[1]
+            scale[0]/2,
+            scale[2]/2,
+            scale[1]/2
         )
 
         rendered_object.setHpr(
@@ -156,15 +160,20 @@ class rendering_task(threading.Thread):
 
 
     def render_posts(self):
-        post_locations = [
-            [4,4,0],
-            [4,-4,0],
-            [-4,4,0],
-            [-4,-4,0]
+        
+        ## Create the 3 dimensional grid of posts
+        post_grid = [
+            [-0.5,self.game.size_of_dimensions[0]-0.5],
+            [-0.5,self.game.size_of_dimensions[1]-0.5],
+            [self.game.size_of_dimensions[2]/2-0.5]
         ]
 
-        self.posts = []
+        
+        ## Generate the cartesian product of post locations
+        post_locations = itertools.product(*post_grid)
 
+        ## Generate the posts
+        self.posts = []
         for post_location in post_locations:
             self.posts.append(self.render_generic_object(
                 'post.dae',
@@ -174,35 +183,33 @@ class rendering_task(threading.Thread):
             ))
 
 
-    def renders_board(self, board, game_pos, dimensions):
+    def renders_board(self, board, pos, dimensions):
         ## renders the board
         if dimensions == 0:
-            top_colour = self.calculate_top_colour(game_pos)
-            bottom_colour = self.calculate_bottom_colour(game_pos)
+            top_colour = self.calculate_top_colour(pos)
+            bottom_colour = self.calculate_bottom_colour(pos)
 
             board_segment = board_segment_render(
-                game_pos,
+                pos,
                 self.colour_map[f'board_{top_colour}']
             )
 
             
-            rendering_pos = []
-            for i in range(0,self.game.dimensions):
-                rendering_pos.append(game_pos[i]-(self.game.size_of_dimensions[i]-1)/2)
                     
             board_segment.obj = self.render_generic_object(
                 'board_piece.dae',
                 f'board_{top_colour}',
-                rendering_pos
+                pos
             )
 
-            rendering_pos[2] = rendering_pos[2] - 0.001
+            ## The bottom section of the board is rendered slightly lower than the top
+            pos[2] = pos[2] - 0.001
 
 
             board_segment.bottom = self.render_generic_object(
                 'board_piece.dae',
                 None,
-                rendering_pos
+                pos
             )
 
             board_segment.bottom.setColorScale(bottom_colour[0],bottom_colour[1],bottom_colour[2],0)
@@ -210,7 +217,7 @@ class rendering_task(threading.Thread):
         else:
             for sub_board in range(0,self.game.size_of_dimensions[dimensions-1]):
                 board.append([])
-                sub_board_pos = game_pos.copy()
+                sub_board_pos = pos.copy()
                 sub_board_pos[dimensions-1] = sub_board
                 self.renders_board(board[-1], sub_board_pos, dimensions-1)
 
