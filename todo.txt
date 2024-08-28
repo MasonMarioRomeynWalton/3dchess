@@ -1,6 +1,6 @@
-
-make bottom of the board procedurally genarated
-make posts variable height
+gitignore __pycache__
+make posts in correct locations
+change post locations
 finish mergeing rendering class/ should be able to run two different panda3ds simultaneously and have both update at the same time 
 
 make file for command line and make it main thread/ read -> command_line
