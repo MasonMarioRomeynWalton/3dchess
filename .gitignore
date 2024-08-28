@@ -1,2 +1,3 @@
 *.swp
 panda3doutput.txt
+**/__pycache__/
