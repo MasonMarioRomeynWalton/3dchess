@@ -1,3 +1,4 @@
+make move class make sense
 change colour of the bottom of the board
 finish mergeing rendering class/ should be able to run two different panda3ds simultaneously and have both update at the same time 
 Test if changing trasparency of board

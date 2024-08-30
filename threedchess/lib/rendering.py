@@ -214,7 +214,7 @@ class rendering_task(threading.Thread):
             )
 
             ## The bottom section of the board is rendered slightly lower than the top
-            pos[2] = pos[2] - 0.0001
+            pos[2] = pos[2] - 0.00005
 
 
             current_board_segment_render.bottom = self.render_generic_object(
@@ -250,9 +250,18 @@ class rendering_task(threading.Thread):
         return colour_index
 
     def calculate_bottom_colour(self, pos):
-        colour = [0,0,0]
-        for i in range(0,self.game.dimensions):
-            colour[i] = pos[i]/self.game.size_of_dimensions[i]
+
+        percent_along_board = []
+        for i in range(0,3):
+            percent_along_board.append(pos[i]/(self.game.size_of_dimensions[i]-1))
+
+        percent_along_board[0] = 1-percent_along_board[0]
+
+        colour = [
+            1-percent_along_board[1]/2-percent_along_board[0]/2,
+            1-percent_along_board[1]/2-percent_along_board[0]/2-percent_along_board[2]/2,
+            1-percent_along_board[0]/2-percent_along_board[2]/2
+        ]
 
         return colour
 
@@ -290,7 +299,7 @@ class rendering_task(threading.Thread):
             #    self.game.pieces[u].atr['rel'] = self.board[self.game.pieces[u].atr['pos'][1]-1][self.game.pieces[u].atr['pos'][2]-1][self.game.pieces[u].atr['pos'][0]-1]
             #    self.board[self.game.pieces[u].atr['pos'][1]-1][self.game.pieces[u].atr['pos'][2]-1][self.game.pieces[u].atr['pos'][0]-1].atr['rel'] = self.game.pieces[u]
             #if self.game.pieces[u].atr['moved_last_turn'] == True:
-            #    self.rendersi(self.game.pieces[u].atr,'piece')
+            #    self.highlight_piece(self.game.pieces[u].atr,'piece')
 
         if not None in self.game.moved_from_last_turn:
             self.board[self.game.moved_from_last_turn[1]-1][self.game.moved_from_last_turn[2]-1][self.game.moved_from_last_turn[0]-1].atr['obj'].setTexture(self.colour_map['last_moved_board'])
@@ -326,7 +335,7 @@ class rendering_task(threading.Thread):
             piece.atr['rel'] = self.board[piece.atr['pos'][1]-1][piece.atr['pos'][2]-1][piece.atr['pos'][0]-1]
             self.board[piece.atr['pos'][1]-1][piece.atr['pos'][2]-1][piece.atr['pos'][0]-1].atr['rel'] = piece
         self.step = True
-        self.rendersi(piece.atr,'piece')
+        self.highlight_piece(piece.atr,'piece')
 
     def remove_piece(self,piece):
         self.step = False
@@ -335,7 +344,7 @@ class rendering_task(threading.Thread):
         loader.unloadModel(f'{piece.atr["typ"]}.dae')
         self.step = True
 
-    def rendersi(self,highlight_piece,piecetype):
+    def highlight_piece(self,highlight_piece,piecetype):
         ## Modify the colour of a piece to the piece status with the highest priority
 
         ## If the piece is picked to be moved
@@ -356,6 +365,7 @@ class rendering_task(threading.Thread):
             elif piecetype == 'board':
                 colour = self.colour_map[f'last_moved_board']
 
+        ## Unhighlight the piece
         else:
             if piecetype == 'piece':
                 colour = self.colour_map[f'player_{highlight_piece.colour}']
@@ -365,7 +375,6 @@ class rendering_task(threading.Thread):
                 else:
                     colour = highlight_piece.colour
 
-        print(colour)
         highlight_piece.obj.setTexture(colour)
 
 
@@ -374,7 +383,7 @@ class rendering_task(threading.Thread):
 
         if self.picked_for_move != None:
             self.picked_for_move.is_picked_for_move = False
-            self.rendersi(self.picked_for_move,'piece')
+            self.highlight_piece(self.picked_for_move,'piece')
 
         self.move.ox = 0
         self.move.oy = 0
@@ -394,13 +403,13 @@ class rendering_task(threading.Thread):
             self.picked_for_move = pickedObj.getNetPythonTag('piece_attributes')
             if self.picked_for_move != None:
                 self.picked_for_move.is_picked_for_move = True
-                self.rendersi(self.picked_for_move,'piece')
+                self.highlight_piece(self.picked_for_move,'piece')
                 self.move.ox = self.picked_for_move.position[0]
                 self.move.oy = self.picked_for_move.position[1]
                 self.move.oz = self.picked_for_move.position[2]
 
     def select_capture_location(self):
-        print('select_capture_location')
+
         self.move.nx = 0
         self.move.ny = 0
         self.move.nz = 0
@@ -423,16 +432,16 @@ class rendering_task(threading.Thread):
                     if 'rel' in self.pickedObjb.keys() != None:
                         self.pickedObjc = self.pickedObjb['rel'].atr
                         self.pickedObjc['ispicked2'] = True
-                        self.rendersi(self.pickedObjc,'piece')
+                        self.highlight_piece(self.pickedObjc,'piece')
                     self.pickedObjb['ispicked2'] = True
-                    self.rendersi(self.pickedObjb,'board')
+                    self.highlight_piece(self.pickedObjb,'board')
                 elif self.pickedObjc != None:
                     if 'rel' in self.pickedObjc.keys() != None:
                         self.pickedObjb = self.pickedObjc['rel'].atr
                         self.pickedObjb['ispicked2'] = True
-                        self.rendersi(self.pickedObjb,'board')
+                        self.highlight_piece(self.pickedObjb,'board')
                     self.pickedObjc['ispicked2'] = True
-                    self.rendersi(self.pickedObjc,'piece')
+                    self.highlight_piece(self.pickedObjc,'piece')
                 if self.pickedObjb != None:
                     self.move.nx = self.pickedObjb['pos'][0]
                     self.move.ny = self.pickedObjb['pos'][1]
@@ -478,19 +487,18 @@ class rendering_task(threading.Thread):
         if hasattr(self,'pickedObjp'):
             if self.pickedObjp != None:
                 self.pickedObjp['ispicked1'] = False
-                self.rendersi(self.pickedObjp,'piece')
-                del self.pickedObjp
+                self.highlight_piece(self.pickedObjp,'piece')
 
     def reset2(self):
         if hasattr(self,'pickedObjc'):
             if self.pickedObjc != None:
                 self.pickedObjc['ispicked2'] = False
-                self.rendersi(self.pickedObjc,'piece')
+                self.highlight_piece(self.pickedObjc,'piece')
                 del self.pickedObjc
         if hasattr(self,'pickedObjb'):
             if self.pickedObjb != None:
                 self.pickedObjb['ispicked2'] = False
-                self.rendersi(self.pickedObjb,'piece')
+                self.highlight_piece(self.pickedObjb,'piece')
                 del self.pickedObjb
 
 

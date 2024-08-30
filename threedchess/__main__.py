@@ -732,14 +732,14 @@ class movement:
         self.dy = abs(self.oy-self.ny)
         self.dz = abs(self.oz-self.nz)
         self.dl = sorted((self.dx,self.dy,self.dz))
-        ip = 0
+        piece_found = 0
         for u in range(0,len(game.pieces)):
             if game.pieces[u].atr['pos'][0] == self.ox and game.pieces[u].atr['pos'][1] == self.oy and game.pieces[u].atr['pos'][2] == self.oz:
                 self.term = u
                 self.piece = game.pieces[u]
                 self.process()
-                ip = 1
-        if ip == 0:
+                piece_found = 1
+        if piece_found == 0:
             print('This is not a valid piece\n')
 
     def process(self):
