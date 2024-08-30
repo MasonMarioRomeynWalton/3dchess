@@ -52,9 +52,9 @@ class controlable_camera():
 
         self.pitch = pi/2
         self.yaw = pi/2
-        self.x_pos = 75
-        self.y_pos = 22.5
-        self.z_pos = 22.5
+        self.x_pos = self.game_size*2+1
+        self.y_pos = 0
+        self.z_pos = 0
 
         self.update_camera()
 

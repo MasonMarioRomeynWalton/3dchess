@@ -24,6 +24,9 @@ class rendering_task(threading.Thread):
         ## initialize the panda3d environment window
         self.initialize_panda3d_environment()
 
+        ## The direction the player's pieces are facing
+        self.player_rotation = {'0':180,'1':0}
+
         ## Render all of the 3d models
         self.render_all_3d_models()
 
@@ -37,7 +40,7 @@ class rendering_task(threading.Thread):
         )
 
         ## Create the camera 
-        self.camera = controlable_camera(max_distance_away,1,0.15)
+        self.camera = controlable_camera(max_distance_away,0.5,0.1)
         self.camera.init_white()
 
         ## Set the amount of time since the last camera update to 0
@@ -120,12 +123,10 @@ class rendering_task(threading.Thread):
 
         self.render_posts()
 
-        self.boards = []
-
         self.board = []
-        self.renders_board(self.board, [0,0,0], self.game.dimensions)
+        self.render_board(self.board, [0,0,0], self.game.dimensions)
 
-        #self.renders()
+        self.render_pieces()
 
     def render_generic_object(self, model, texture, game_position = [0,0,0], rotation = [0,0,0], scale = [1,1,1]):
         rendered_object = loader.loadModel(model)
@@ -165,7 +166,7 @@ class rendering_task(threading.Thread):
         post_grid = [
             [-0.5,self.game.size_of_dimensions[0]-0.5],
             [-0.5,self.game.size_of_dimensions[1]-0.5],
-            [self.game.size_of_dimensions[2]/2-0.5]
+            [self.game.size_of_dimensions[2]/2-1]
         ]
 
         
@@ -183,7 +184,7 @@ class rendering_task(threading.Thread):
             ))
 
 
-    def renders_board(self, board, pos, dimensions):
+    def render_board(self, board, pos, dimensions):
         ## renders the board
         if dimensions == 0:
             top_colour = self.calculate_top_colour(pos)
@@ -196,14 +197,18 @@ class rendering_task(threading.Thread):
 
             
                     
+            ## Because the board is rendered slightly lower than the pieces
+            pos[2] = pos[2] - 0.5
+
             board_segment.obj = self.render_generic_object(
                 'board_piece.dae',
                 f'board_{top_colour}',
                 pos
+
             )
 
             ## The bottom section of the board is rendered slightly lower than the top
-            pos[2] = pos[2] - 0.001
+            pos[2] = pos[2] - 0.0001
 
 
             board_segment.bottom = self.render_generic_object(
@@ -219,7 +224,7 @@ class rendering_task(threading.Thread):
                 board.append([])
                 sub_board_pos = pos.copy()
                 sub_board_pos[dimensions-1] = sub_board
-                self.renders_board(board[-1], sub_board_pos, dimensions-1)
+                self.render_board(board[-1], sub_board_pos, dimensions-1)
 
     def calculate_top_colour(self, pos):
         ## This is not possible in higher dimensions
@@ -245,7 +250,7 @@ class rendering_task(threading.Thread):
 
         return colour
 
-    def unrenders_board(self):
+    def unrender_board(self):
         self.step = False
         for boardx in range(0,8):
             for boardy in range(0,8):
@@ -254,35 +259,36 @@ class rendering_task(threading.Thread):
                     time.sleep(0.01)
         self.step = True
 
-    def renders(self):
+    def render_pieces(self):
         ## renders all the pieces
-        self.step = False
-        for u in range (0,len(self.game.pieces)):
-            self.game.pieces[u].atr['obj'] = loader.loadModel(f'{self.game.pieces[u].atr["typ"]}.dae')
-            self.game.pieces[u].atr['obj'].reparentTo(render)
-            self.game.pieces[u].atr['obj'].setPos(self.game.pieces[u].atr['pos'][1]*self.game_size,self.game.pieces[u].atr['pos'][2]*self.game_size,self.game.pieces[u].atr['pos'][0]*self.game_size)
-            self.game.pieces[u].atr['obj'].setScale(self.half_game_size,self.half_game_size,self.half_game_size)
-            if self.game.pieces[u].atr['col'] == 0:
-                self.game.pieces[u].atr['obj'].setTexture(self.colour_map[f'player_0'], 1)
-                self.game.pieces[u].atr['obj'].setHpr(0,0,180)
-            if self.game.pieces[u].atr['col'] == 1:
-                self.game.pieces[u].atr['obj'].setTexture(self.colour_map[f'player_1'], 1)
-                self.game.pieces[u].atr['obj'].setHpr(0,0,0)
+        
 
-            self.game.pieces[u].atr['obj'].setPythonTag('piece',self.game.pieces[u].atr)
-            if self.game.pieces[u].atr['pos'][2]-1 >= 0:
-                self.game.pieces[u].atr['rel'] = self.board[self.game.pieces[u].atr['pos'][1]-1][self.game.pieces[u].atr['pos'][2]-1][self.game.pieces[u].atr['pos'][0]-1]
-                self.board[self.game.pieces[u].atr['pos'][1]-1][self.game.pieces[u].atr['pos'][2]-1][self.game.pieces[u].atr['pos'][0]-1].atr['rel'] = self.game.pieces[u]
-            if self.game.pieces[u].atr['moved_last_turn'] == True:
-                self.rendersi(self.game.pieces[u].atr,'piece')
+
+        for piece in self.game.pieces:
+
+            self.render_generic_object(
+                f'{piece.atr["typ"]}.dae',
+                f'player_{piece.atr["col"]}',
+                piece.atr['pos'],
+                [0,0,self.player_rotation[str(piece.atr["col"])]],
+            )
+
+
+
+            #self.game.pieces[u].atr['obj'].setPythonTag('piece',self.game.pieces[u].atr)
+            #if self.game.pieces[u].atr['pos'][2]-1 >= 0:
+            #    self.game.pieces[u].atr['rel'] = self.board[self.game.pieces[u].atr['pos'][1]-1][self.game.pieces[u].atr['pos'][2]-1][self.game.pieces[u].atr['pos'][0]-1]
+            #    self.board[self.game.pieces[u].atr['pos'][1]-1][self.game.pieces[u].atr['pos'][2]-1][self.game.pieces[u].atr['pos'][0]-1].atr['rel'] = self.game.pieces[u]
+            #if self.game.pieces[u].atr['moved_last_turn'] == True:
+            #    self.rendersi(self.game.pieces[u].atr,'piece')
+
         if not None in self.game.moved_from_last_turn:
             self.board[self.game.moved_from_last_turn[1]-1][self.game.moved_from_last_turn[2]-1][self.game.moved_from_last_turn[0]-1].atr['obj'].setTexture(self.colour_map['last_moved_board'])
-        self.step = True
 
     def reset():
         self.unrenders()
-        self.unrenders_board()
-        self.renders_board(self.board, [0,0,0], self.game.dimensions)
+        self.unrender_board()
+        self.render_board(self.board, [0,0,0], self.game.dimensions)
         self.renders()
 
     def unrenders(self):
@@ -450,6 +456,7 @@ class rendering_task(threading.Thread):
                 self.move.oy = 0
                 self.move.oz = 0
 
+    ## Unused?
     def reset_piece_colour(self):
         if hasattr(self,'pickedObjp'):
             if self.pickedObjp != None:
@@ -469,6 +476,8 @@ class rendering_task(threading.Thread):
                 self.rendersi(self.pickedObjb,'piece')
                 del self.pickedObjb
 
+
+    # Merge these two
     def run(self):
         # self.base = ShowBase()
         self.app = MyApp(game)
