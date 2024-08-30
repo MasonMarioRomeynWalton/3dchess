@@ -1,6 +1,7 @@
 change colour of the bottom of the board
 finish mergeing rendering class/ should be able to run two different panda3ds simultaneously and have both update at the same time 
 Test if changing trasparency of board
+rendering class should not be able to edit piece date through game
 
 make file for command line and make it main thread/ read -> command_line
 make file for a movement with a boolean for castling/capturing

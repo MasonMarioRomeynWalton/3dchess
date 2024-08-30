@@ -21,11 +21,17 @@ class rendering_task(threading.Thread):
         #To merge
         self.move = move
 
-        ## initialize the panda3d environment window
-        self.initialize_panda3d_environment()
-
         ## The direction the player's pieces are facing
         self.player_rotation = {'0':180,'1':0}
+
+        ## The piece that is picked for moving
+        self.picked_for_move = None
+
+        ## The piece that is picked for capture
+        self.picked_for_capture = None
+
+        ## initialize the panda3d environment window
+        self.initialize_panda3d_environment()
 
         ## Render all of the 3d models
         self.render_all_3d_models()
@@ -190,7 +196,7 @@ class rendering_task(threading.Thread):
             top_colour = self.calculate_top_colour(pos)
             bottom_colour = self.calculate_bottom_colour(pos)
 
-            board_segment = board_segment_render(
+            current_board_segment_render = board_segment_render(
                 pos,
                 self.colour_map[f'board_{top_colour}']
             )
@@ -200,7 +206,7 @@ class rendering_task(threading.Thread):
             ## Because the board is rendered slightly lower than the pieces
             pos[2] = pos[2] - 0.5
 
-            board_segment.obj = self.render_generic_object(
+            current_board_segment_render.obj = self.render_generic_object(
                 'board_piece.dae',
                 f'board_{top_colour}',
                 pos
@@ -211,13 +217,13 @@ class rendering_task(threading.Thread):
             pos[2] = pos[2] - 0.0001
 
 
-            board_segment.bottom = self.render_generic_object(
+            current_board_segment_render.bottom = self.render_generic_object(
                 'board_piece.dae',
                 None,
                 pos
             )
 
-            board_segment.bottom.setColorScale(bottom_colour[0],bottom_colour[1],bottom_colour[2],0)
+            current_board_segment_render.bottom.setColorScale(bottom_colour[0],bottom_colour[1],bottom_colour[2],0)
 
         else:
             for sub_board in range(0,self.game.size_of_dimensions[dimensions-1]):
@@ -266,12 +272,16 @@ class rendering_task(threading.Thread):
 
         for piece in self.game.pieces:
 
-            self.render_generic_object(
+            current_piece_render = piece_render(piece.atr['pos'], piece.atr['col'])
+
+            current_piece_render.obj = self.render_generic_object(
                 f'{piece.atr["typ"]}.dae',
                 f'player_{piece.atr["col"]}',
                 piece.atr['pos'],
                 [0,0,self.player_rotation[str(piece.atr["col"])]],
             )
+
+            current_piece_render.obj.setPythonTag('piece_attributes', current_piece_render)
 
 
 
@@ -298,7 +308,8 @@ class rendering_task(threading.Thread):
             self.game.pieces[u].atr['obj'].removeNode()
             time.sleep(0.01)
         self.step = True
-    def rerenders(self,piece):
+
+    def create_piece(self,piece):
         self.step = False
         piece.atr['obj'] = loader.loadModel(f'{piece.atr["typ"]}.dae')
         piece.atr['obj'].reparentTo(render)
@@ -317,52 +328,58 @@ class rendering_task(threading.Thread):
         self.step = True
         self.rendersi(piece.atr,'piece')
 
-    def reunrenders(self,piece):
+    def remove_piece(self,piece):
         self.step = False
         piece.atr['obj'].removeNode()
         time.sleep(0.01)
         loader.unloadModel(f'{piece.atr["typ"]}.dae')
         self.step = True
 
-    def rendersi(self,highlightpiece,piecetype):
-        if highlightpiece['ispicked2'] == True:
+    def rendersi(self,highlight_piece,piecetype):
+        ## Modify the colour of a piece to the piece status with the highest priority
+
+        ## If the piece is picked to be moved
+        if highlight_piece.is_picked_for_move == True:
+            colour = self.colour_map[f'move_piece_{highlight_piece.colour}']
+
+        ## If the piece is picked to be captured
+        elif highlight_piece.is_picked_for_capture == True:
             if piecetype == 'piece':
-                if highlightpiece['col'] == 0:
-                    color = self.colour_map['capture_piece_0']
-                if highlightpiece['col'] == 1:
-                    color = self.colour_map['capture_piece_1']
-            if piecetype == 'board':
-                color = self.colour_map['capture_board']
-        if highlightpiece['moved_last_turn'] == True:
-            if highlightpiece['col'] == 0:
-                color = self.colour_map['last_moved_piece_0']
-            if highlightpiece['col'] == 1:
-                color = self.colour_map['last_moved_piece_1']
-        if highlightpiece['ispicked1'] == True:
-            if highlightpiece['col'] == 0:
-                color = self.colour_map['move_piece_0']
-            if highlightpiece['col'] == 1:
-                color = self.colour_map['move_piece_1']
-        if highlightpiece['ispicked1'] == False and highlightpiece['ispicked2'] == False and highlightpiece['moved_last_turn'] == False:
-            if highlightpiece['col'] == 0:
-                color = self.colour_map['player_0']
-            elif highlightpiece['col'] == 1:
-                color = self.colour_map['player_1']
-            elif not None in self.game.moved_from_last_turn:
-                if highlightpiece == self.board[self.game.moved_from_last_turn[1]-1][self.game.moved_from_last_turn[2]-1][self.game.moved_from_last_turn[0]-1].atr:
-                    color = self.colour_map['last_moved_board']
+                colour = self.colour_map[f'capture_piece_{highlight_piece.colour}']
+            elif piecetype == 'board':
+                colour = self.colour_map[f'capture_board']
+
+        ## If the piece has been moved or moved from in the last turn
+        elif highlight_piece.moved_last_turn == True:
+            if piecetype == 'piece':
+                colour = self.colour_map[f'last_moved_piece_{highlight_piece.colour}']
+            elif piecetype == 'board':
+                colour = self.colour_map[f'last_moved_board']
+
+        else:
+            if piecetype == 'piece':
+                colour = self.colour_map[f'player_{highlight_piece.colour}']
+            elif piecetype == 'board':
+                if highlight_piece.pos == self.game.moved_from_last_turn:
+                    colour = self.colour_map['last_moved_board']
                 else:
-                    color = highlightpiece.col
-            else:
-                color = highlightpiece.col
-        highlightpiece['obj'].setTexture(color)
+                    colour = highlight_piece.colour
+
+        print(colour)
+        highlight_piece.obj.setTexture(colour)
+
 
     def select_move_piece(self):
         #Change to move(x,y,z)
+
+        if self.picked_for_move != None:
+            self.picked_for_move.is_picked_for_move = False
+            self.rendersi(self.picked_for_move,'piece')
+
         self.move.ox = 0
         self.move.oy = 0
         self.move.oz = 0
-        self.reset()
+
         try:
             mpos = base.mouseWatcherNode.getMouse()
         except:
@@ -373,14 +390,14 @@ class rendering_task(threading.Thread):
         if self.queue.getNumEntries() > 0:
             self.queue.sortEntries()
             pickedObj = self.queue.getEntry(0).getIntoNodePath()
-            pickedObj = pickedObj.findNetPythonTag('piece')
-            self.pickedObjp = pickedObj.getNetPythonTag('piece')
-            if self.pickedObjp != None:
-                self.pickedObjp['ispicked1'] = True
-                self.rendersi(self.pickedObjp,'piece')
-                self.move.ox = self.pickedObjp['pos'][0]
-                self.move.oy = self.pickedObjp['pos'][1]
-                self.move.oz = self.pickedObjp['pos'][2]
+            pickedObj = pickedObj.findNetPythonTag('piece_attributes')
+            self.picked_for_move = pickedObj.getNetPythonTag('piece_attributes')
+            if self.picked_for_move != None:
+                self.picked_for_move.is_picked_for_move = True
+                self.rendersi(self.picked_for_move,'piece')
+                self.move.ox = self.picked_for_move.position[0]
+                self.move.oy = self.picked_for_move.position[1]
+                self.move.oz = self.picked_for_move.position[2]
 
     def select_capture_location(self):
         print('select_capture_location')
@@ -551,18 +568,27 @@ class hotkey_control(key_control):
         self.setKey(0)
 
 class board_segment_render():
-    def __init__(self,pos,col):
-        self.pos = pos
-        self.col = col
-        self.moved_last_turn = False
-        self.ispicked1 = False
-        self.ispicked2 = False
+    def __init__(self, position, colour):
+        
+        ## Need for knowing the position of where to move to
+        self.position = position
 
+        self.colour = colour
+        self.picked_for_capture = False
+        self.moved_last_turn = False
 
 class piece_render():
-    def __init__():
-        self.is_picked1 = False
-        self.is_picked2 = False
+    def __init__(self, position, colour):
+
+
+        ## Need for knowing the position of where to move from
+        self.position = position
+
+        self.colour = colour
+
+        self.is_picked_for_move = False
+        self.is_picked_for_capture = False
+        self.moved_last_turn = False
 
 
 
