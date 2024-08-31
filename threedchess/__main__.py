@@ -186,7 +186,7 @@ class game():
         self.horse5    = piece('horse',   [6, 0, 6],1)
         self.horse6    = piece('horse',   [7, 1, 6],1)
         self.horse7    = piece('horse',   [7, 6, 6],1)
-        self.horse8    = piece('horse',   [6, 7, 7],1)
+        self.horse8    = piece('horse',   [6, 7, 6],1)
         self.elephant5 = piece('elephant',[6, 0, 7],1)
         self.elephant6 = piece('elephant',[6, 1, 6],1)
         self.elephant7 = piece('elephant',[6, 6, 6],1)

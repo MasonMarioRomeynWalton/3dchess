@@ -27,6 +27,9 @@ class rendering_task(threading.Thread):
         ## The piece that is picked for moving
         self.picked_for_move = None
 
+        ## The board segment that is picked for being moved to
+        self.picked_for_capture_board = None
+
         ## The piece that is picked for capture
         self.picked_for_capture = None
 
@@ -98,6 +101,8 @@ class rendering_task(threading.Thread):
 
     def render_all_3d_models(self):
         
+        # Get these from file
+
         colour_list = []
         for i in range(0,8):
             colour_list.append(f'board_{i}')
@@ -107,6 +112,8 @@ class rendering_task(threading.Thread):
             colour_list.append(f'move_piece_{i}')
             colour_list.append(f'capture_piece_{i}')
             colour_list.append(f'last_moved_piece_{i}')
+
+        colour_list.append(f'capture_board')
 
         colour_list.append('grid')
         colour_list.append('post')
@@ -131,6 +138,8 @@ class rendering_task(threading.Thread):
 
         self.board = []
         self.render_board(self.board, [0,0,0], self.game.dimensions)
+
+        self.board[3][2][1][0].obj.setTexture(self.colour_map['post'])
 
         self.render_pieces()
 
@@ -201,7 +210,7 @@ class rendering_task(threading.Thread):
                 self.colour_map[f'board_{top_colour}']
             )
 
-            
+            board.append(current_board_segment_render)
                     
             ## Because the board is rendered slightly lower than the pieces
             pos[2] = pos[2] - 0.5
@@ -212,6 +221,8 @@ class rendering_task(threading.Thread):
                 pos
 
             )
+
+            current_board_segment_render.obj.setPythonTag('object_attributes', current_board_segment_render)
 
             ## The bottom section of the board is rendered slightly lower than the top
             pos[2] = pos[2] - 0.00005
@@ -255,11 +266,12 @@ class rendering_task(threading.Thread):
         for i in range(0,3):
             percent_along_board.append(pos[i]/(self.game.size_of_dimensions[i]-1))
 
-        percent_along_board[0] = 1-percent_along_board[0]
+        percent_along_board[0] = percent_along_board[0]
+        percent_along_board[2] = 1-percent_along_board[2]
 
         colour = [
-            1-percent_along_board[1]/2-percent_along_board[0]/2,
-            1-percent_along_board[1]/2-percent_along_board[0]/2-percent_along_board[2]/2,
+            1-percent_along_board[0]/2-percent_along_board[1]/2,
+            1-percent_along_board[0]/2-percent_along_board[1]/2-percent_along_board[2]/2,
             1-percent_along_board[0]/2-percent_along_board[2]/2
         ]
 
@@ -290,7 +302,9 @@ class rendering_task(threading.Thread):
                 [0,0,self.player_rotation[str(piece.atr["col"])]],
             )
 
-            current_piece_render.obj.setPythonTag('piece_attributes', current_piece_render)
+            current_piece_render.obj.setPythonTag('object_attributes', current_piece_render)
+
+            self.board[piece.atr['pos'][2]][piece.atr['pos'][1]][piece.atr['pos'][0]][0].rel = current_piece_render
 
 
 
@@ -370,7 +384,7 @@ class rendering_task(threading.Thread):
             if piecetype == 'piece':
                 colour = self.colour_map[f'player_{highlight_piece.colour}']
             elif piecetype == 'board':
-                if highlight_piece.pos == self.game.moved_from_last_turn:
+                if highlight_piece.position == self.game.moved_from_last_turn:
                     colour = self.colour_map['last_moved_board']
                 else:
                     colour = highlight_piece.colour
@@ -384,6 +398,7 @@ class rendering_task(threading.Thread):
         if self.picked_for_move != None:
             self.picked_for_move.is_picked_for_move = False
             self.highlight_piece(self.picked_for_move,'piece')
+            self.picked_for_move = None
 
         self.move.ox = 0
         self.move.oy = 0
@@ -393,15 +408,17 @@ class rendering_task(threading.Thread):
             mpos = base.mouseWatcherNode.getMouse()
         except:
             print('You clicked off the screen\n')
-            return
+
         self.pickerRay.setFromLens(base.camNode, mpos.getX(), mpos.getY())
         self.myTraverser.traverse(render)
         if self.queue.getNumEntries() > 0:
             self.queue.sortEntries()
             pickedObj = self.queue.getEntry(0).getIntoNodePath()
-            pickedObj = pickedObj.findNetPythonTag('piece_attributes')
-            self.picked_for_move = pickedObj.getNetPythonTag('piece_attributes')
-            if self.picked_for_move != None:
+            pickedObj = pickedObj.findNetPythonTag('object_attributes')
+            pickedObj = pickedObj.getNetPythonTag('object_attributes')
+
+            if type(pickedObj) == piece_render:
+                self.picked_for_move = pickedObj
                 self.picked_for_move.is_picked_for_move = True
                 self.highlight_piece(self.picked_for_move,'piece')
                 self.move.ox = self.picked_for_move.position[0]
@@ -414,42 +431,52 @@ class rendering_task(threading.Thread):
         self.move.ny = 0
         self.move.nz = 0
         self.reset2()
+
+        if self.picked_for_capture != None:
+            self.picked_for_capture.is_picked_for_capture = False
+            self.highlight_piece(self.picked_for_capture,'piece')
+            self.picked_for_capture = None
+
+        if self.picked_for_capture_board != None:
+            self.picked_for_capture_board.is_picked_for_capture = False
+            self.highlight_piece(self.picked_for_capture_board,'board')
+            self.picked_for_capture = None
+
         try:
             mpos = base.mouseWatcherNode.getMouse()
         except:
             print('You clicked off the screen\n')
             return
+
         self.pickerRay.setFromLens(base.camNode, mpos.getX(), mpos.getY())
         self.myTraverser.traverse(render)
         if self.queue.getNumEntries() > 0:
-            print('picked something')
             self.queue.sortEntries()
             pickedObj = self.queue.getEntry(0).getIntoNodePath()
-            self.pickedObjc = pickedObj.getNetPythonTag('piece')
-            self.pickedObjb = pickedObj.getNetPythonTag('board')
-            if self.pickedObjb != None or self.pickedObjc != None:
-                if self.pickedObjb != None:
-                    if 'rel' in self.pickedObjb.keys() != None:
-                        self.pickedObjc = self.pickedObjb['rel'].atr
-                        self.pickedObjc['ispicked2'] = True
-                        self.highlight_piece(self.pickedObjc,'piece')
-                    self.pickedObjb['ispicked2'] = True
-                    self.highlight_piece(self.pickedObjb,'board')
-                elif self.pickedObjc != None:
-                    if 'rel' in self.pickedObjc.keys() != None:
-                        self.pickedObjb = self.pickedObjc['rel'].atr
-                        self.pickedObjb['ispicked2'] = True
-                        self.highlight_piece(self.pickedObjb,'board')
-                    self.pickedObjc['ispicked2'] = True
-                    self.highlight_piece(self.pickedObjc,'piece')
-                if self.pickedObjb != None:
-                    self.move.nx = self.pickedObjb['pos'][0]
-                    self.move.ny = self.pickedObjb['pos'][1]
-                    self.move.nz = self.pickedObjb['pos'][2]
+            pickedObj = pickedObj.findNetPythonTag('object_attributes')
+            pickedObj = pickedObj.getNetPythonTag('object_attributes')
+
+            if type(pickedObj) == board_segment_render:
+                self.picked_for_capture_board = pickedObj
+                if self.picked_for_capture_board.rel != None:
+                    self.picked_for_capture = self.picked_for_capture_board.rel
                 else:
-                    self.move.nx = self.pickedObjc['pos'][0]
-                    self.move.ny = self.pickedObjc['pos'][1]
-                    self.move.nz = self.pickedObjc['pos'][2]
+                    self.picked_for_capture = None
+            
+            if type(pickedObj) == piece_render:
+                self.picked_for_capture = pickedObj
+                self.picked_for_capture_board = self.board[self.picked_for_capture.position[2]][self.picked_for_capture.position[1]][self.picked_for_capture.position[0]][0]
+
+            if self.picked_for_capture_board != None:
+                self.picked_for_capture_board.is_picked_for_capture = True
+                self.highlight_piece(self.picked_for_capture_board, 'board')
+
+            if self.picked_for_capture != None:
+                self.picked_for_capture.is_picked_for_capture = True
+                self.highlight_piece(self.picked_for_capture, 'piece')
+
+
+            # Add ox ny stuff
 
     def stuff2(self):
         self.reset2()
@@ -581,7 +608,10 @@ class board_segment_render():
         ## Need for knowing the position of where to move to
         self.position = position
 
+        self.rel = None
+
         self.colour = colour
+        self.is_picked_for_move = None
         self.picked_for_capture = False
         self.moved_last_turn = False
 
@@ -589,9 +619,10 @@ class piece_render():
     def __init__(self, position, colour):
 
 
-        ## Need for knowing the position of where to move from
+        ## Needed for knowing the position of where to move from
         self.position = position
 
+        ## Needed for knowing which colour to render the pieces
         self.colour = colour
 
         self.is_picked_for_move = False
