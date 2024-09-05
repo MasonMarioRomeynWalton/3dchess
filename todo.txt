@@ -3,6 +3,8 @@ make move class make sense
 finish finish rendering class
 test with changing trasparency of board
 rendering class should not be able to edit piece data through game
+change map named from 0/1 to black/white
+render bottom as one for better performance
 
 make python file for a movement with a boolean for castling/capturing
 
@@ -33,11 +35,10 @@ Add check. Turn  king (purple/orange)
 
 New:
 
-make n-dimesional chess
+Make 3d-chess where the pieces occupy a 8x8x3 space and so on
 make n-dimensional pieces
 (rook_like_piece, king_like_piece, pawn_like_piece, knight_like_piece
 
-make normal chess
 make chess lite (1d horse, rook, 1d king)
 make 3dchess lite
 
@@ -52,3 +53,4 @@ make castling lite
 Make piece placement automatic for NxM board
 
 
+make n-dimesional chess

@@ -2,7 +2,6 @@ from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
 from panda3d.core import *
 
-from direct.stdpy import threading
 import time
 import itertools
 
@@ -12,7 +11,6 @@ home = "../../3dchess"
 
 class rendering_task():
     def __init__(self, game):
-        threading.Thread.__init__(self)
 
 
         ## The game object
@@ -29,6 +27,12 @@ class rendering_task():
 
         ## The piece that is picked for capture
         self.picked_for_capture = None
+
+
+        # Hmm
+        self.step = True
+
+    def run(self):
 
         ## initialize the panda3d environment window
         self.initialize_panda3d_environment()
@@ -71,7 +75,14 @@ class rendering_task():
             hotkey_control(  'enter',  self.stuff2)
         ]
 
-        self.step = True
+
+
+        taskMgr.add(self.check_for_input, 'cameramove', extraArgs=[self.camera], appendTask=True)
+
+        while True:
+            if self.step == True:
+                taskMgr.step()
+            time.sleep(0.01)
 
     def initialize_panda3d_environment(self):
         ## Create the error stream
@@ -130,10 +141,10 @@ class rendering_task():
             render.setLight(self.directionalLightNP[u])
 
         self.posts = self.render_posts()
-        self.board = self.render_board([0,0,0], self.game.dimensions)
+        self.board = self.render_board([0,0,0], 3)
         self.pieces = self.render_pieces()
 
-    def render_generic_object(self, model, texture, game_position = [0,0,0], rotation = [0,0,0], scale = [1,1,1]):
+    def render_generic_object(self, model, texture, game_position, rotation = [0,0,0], scale = [1,1,1]):
         rendered_object = loader.loadModel(model)
         rendered_object.reparentTo(render)
 
@@ -143,14 +154,14 @@ class rendering_task():
 
         rendered_object.setPos(
             rendering_position[0],
-            rendering_position[2],
-            rendering_position[1]
+            rendering_position[1],
+            rendering_position[2]
         )
 
         rendered_object.setScale(
             scale[0]/2,
-            scale[2]/2,
-            scale[1]/2
+            scale[1]/2,
+            scale[2]/2
         )
 
         rendered_object.setHpr(
@@ -170,8 +181,8 @@ class rendering_task():
         ## Create the 3 dimensional grid of posts
         post_grid = [
             [-0.5,self.game.size_of_dimensions[0]-0.5],
-            [-0.5,self.game.size_of_dimensions[1]-0.5],
-            [self.game.size_of_dimensions[2]/2-1]
+            [self.game.size_of_dimensions[1]/2-1],
+            [-0.5,self.game.size_of_dimensions[2]-0.5]
         ]
 
         
@@ -185,7 +196,7 @@ class rendering_task():
                 'post.dae',
                 'post',
                 post_location,
-                scale = [1,1,self.game.size_of_dimensions[2]-0.5]
+                scale = [1,self.game.size_of_dimensions[1]-0.5,1]
             ))
 
 
@@ -201,7 +212,7 @@ class rendering_task():
             )
 
             ## Because the board is rendered slightly lower than the pieces
-            pos[2] = pos[2] - 0.5
+            pos[1] = pos[1] - 0.5
 
             current_board_segment_render.obj = self.render_generic_object(
                 'board_piece.dae',
@@ -213,7 +224,7 @@ class rendering_task():
             current_board_segment_render.obj.setPythonTag('object_attributes', current_board_segment_render)
 
             ## The bottom section of the board is rendered slightly lower than the top
-            pos[2] = pos[2] - 0.00005
+            pos[1] = pos[1] - 0.0005
 
 
             current_board_segment_render.bottom = self.render_generic_object(
@@ -259,17 +270,16 @@ class rendering_task():
             if self.game.size_of_dimensions[i] != 1:
                 percent_along_board.append(pos[i]/(self.game.size_of_dimensions[i]-1))
             else:
-                #Look at to see if it is 0 or 1
                 percent_along_board.append(1)
 
 
         percent_along_board[0] = percent_along_board[0]
-        percent_along_board[2] = 1-percent_along_board[2]
+        percent_along_board[1] = 1-percent_along_board[1]
 
         colour = [
-            1-percent_along_board[0]/2-percent_along_board[1]/2,
-            1-percent_along_board[0]/2-percent_along_board[1]/2-percent_along_board[2]/2,
-            1-percent_along_board[0]/2-percent_along_board[2]/2
+            1-percent_along_board[0]/2-percent_along_board[2]/2,
+            1-percent_along_board[0]/2-percent_along_board[2]/2-percent_along_board[1]/2,
+            1-percent_along_board[0]/2-percent_along_board[1]/2
         ]
 
         return colour
@@ -289,20 +299,20 @@ class rendering_task():
         pieces = []
         for piece in self.game.pieces:
 
-            current_piece_render = piece_render(piece.atr['pos'], piece.atr['col'])
+            current_piece_render = piece_render(piece.position, piece.colour)
 
             current_piece_render.obj = self.render_generic_object(
-                f'{piece.atr["typ"]}.dae',
-                f'player_{piece.atr["col"]}',
-                piece.atr['pos'],
-                [0,0,self.player_rotation[str(piece.atr["col"])]],
+                f'{piece.piece_type}.dae',
+                f'player_{piece.colour}',
+                piece.position,
+                [0,0,self.player_rotation[str(piece.colour)]],
             )
 
             current_piece_render.obj.setPythonTag('object_attributes', current_piece_render)
 
             related_board = self.board
-            for i in range(self.game.dimensions-1, -1,-1):
-                related_board = related_board[piece.atr['pos'][i]]
+            for dimension in range(2, -1,-1):
+                related_board = related_board[piece.position[dimension]]
             related_board.rel = current_piece_render
 
             pieces.append(current_piece_render)
@@ -342,7 +352,7 @@ class rendering_task():
         self.step = False
         piece.atr['obj'].removeNode()
         time.sleep(0.01)
-        loader.unloadModel(f'{piece.atr["typ"]}.dae')
+        loader.unloadModel(f'{piece.piece_type}.dae')
         self.step = True
 
     def highlight_piece(self,highlight_piece,piecetype):
@@ -444,8 +454,8 @@ class rendering_task():
                 self.picked_for_capture = pickedObj
 
                 self.picked_for_capture_board = self.board
-                for i in range(self.game.dimensions-1, -1,-1):
-                    self.picked_for_capture_board = self.picked_for_capture_board[self.picked_for_capture.position[i]]
+                for dimension in range(2, -1, -1):
+                    self.picked_for_capture_board = self.picked_for_capture_board[self.picked_for_capture.position[dimension]]
 
             if self.picked_for_capture_board != None:
                 self.picked_for_capture_board.is_picked_for_capture = True
@@ -514,14 +524,6 @@ class rendering_task():
         # self.base = ShowBase()
 
 
-    def run(self):
-
-        taskMgr.add(self.check_for_input, 'cameramove', extraArgs=[self.camera], appendTask=True)
-
-        while True:
-            if self.step == True:
-                taskMgr.step()
-            time.sleep(0.01)
 
     def check_for_input(self, camera, task):
         movement_distance = self.time_elapsed*20
