@@ -2,7 +2,7 @@ from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
 from panda3d.core import *
 
-import threading
+from direct.stdpy import threading
 import time
 import itertools
 
@@ -10,16 +10,13 @@ from . import controlable_camera
 
 home = "../../3dchess"
 
-class rendering_task(threading.Thread):
-    def __init__(self, move, game):
+class rendering_task():
+    def __init__(self, game):
         threading.Thread.__init__(self)
 
 
         ## The game object
         self.game = game
-
-        #To merge
-        self.move = move
 
         ## The direction the player's pieces are facing
         self.player_rotation = {'0':180,'1':0}
@@ -38,8 +35,6 @@ class rendering_task(threading.Thread):
 
         ## Render all of the 3d models
         self.render_all_3d_models()
-
-
 
         ## The maximum distance the camera can be from the board
         max_distance_away = max(
@@ -134,21 +129,16 @@ class rendering_task(threading.Thread):
             self.directionalLightNP[u].setHpr(self.directionalLight[u][0],self.directionalLight[u][1],self.directionalLight[u][2])
             render.setLight(self.directionalLightNP[u])
 
-        self.render_posts()
-
-        self.board = []
-        self.render_board(self.board, [0,0,0], self.game.dimensions)
-
-        self.board[3][2][1][0].obj.setTexture(self.colour_map['post'])
-
-        self.render_pieces()
+        self.posts = self.render_posts()
+        self.board = self.render_board([0,0,0], self.game.dimensions)
+        self.pieces = self.render_pieces()
 
     def render_generic_object(self, model, texture, game_position = [0,0,0], rotation = [0,0,0], scale = [1,1,1]):
         rendered_object = loader.loadModel(model)
         rendered_object.reparentTo(render)
 
         rendering_position = []
-        for i in range(0,self.game.dimensions):
+        for i in range(0,3):
             rendering_position.append(game_position[i]-(self.game.size_of_dimensions[i]-1)/2)
 
         rendered_object.setPos(
@@ -199,7 +189,7 @@ class rendering_task(threading.Thread):
             ))
 
 
-    def render_board(self, board, pos, dimensions):
+    def render_board(self, pos, dimensions):
         ## renders the board
         if dimensions == 0:
             top_colour = self.calculate_top_colour(pos)
@@ -210,8 +200,6 @@ class rendering_task(threading.Thread):
                 self.colour_map[f'board_{top_colour}']
             )
 
-            board.append(current_board_segment_render)
-                    
             ## Because the board is rendered slightly lower than the pieces
             pos[2] = pos[2] - 0.5
 
@@ -236,12 +224,16 @@ class rendering_task(threading.Thread):
 
             current_board_segment_render.bottom.setColorScale(bottom_colour[0],bottom_colour[1],bottom_colour[2],0)
 
+            return current_board_segment_render
+
         else:
+            board = []
             for sub_board in range(0,self.game.size_of_dimensions[dimensions-1]):
-                board.append([])
                 sub_board_pos = pos.copy()
                 sub_board_pos[dimensions-1] = sub_board
-                self.render_board(board[-1], sub_board_pos, dimensions-1)
+                board.append(self.render_board(sub_board_pos, dimensions-1))
+
+            return board
 
     def calculate_top_colour(self, pos):
         ## This is not possible in higher dimensions
@@ -264,7 +256,12 @@ class rendering_task(threading.Thread):
 
         percent_along_board = []
         for i in range(0,3):
-            percent_along_board.append(pos[i]/(self.game.size_of_dimensions[i]-1))
+            if self.game.size_of_dimensions[i] != 1:
+                percent_along_board.append(pos[i]/(self.game.size_of_dimensions[i]-1))
+            else:
+                #Look at to see if it is 0 or 1
+                percent_along_board.append(1)
+
 
         percent_along_board[0] = percent_along_board[0]
         percent_along_board[2] = 1-percent_along_board[2]
@@ -288,9 +285,8 @@ class rendering_task(threading.Thread):
 
     def render_pieces(self):
         ## renders all the pieces
-        
 
-
+        pieces = []
         for piece in self.game.pieces:
 
             current_piece_render = piece_render(piece.atr['pos'], piece.atr['col'])
@@ -304,7 +300,14 @@ class rendering_task(threading.Thread):
 
             current_piece_render.obj.setPythonTag('object_attributes', current_piece_render)
 
-            self.board[piece.atr['pos'][2]][piece.atr['pos'][1]][piece.atr['pos'][0]][0].rel = current_piece_render
+            related_board = self.board
+            for i in range(self.game.dimensions-1, -1,-1):
+                related_board = related_board[piece.atr['pos'][i]]
+            related_board.rel = current_piece_render
+
+            pieces.append(current_piece_render)
+        
+        return pieces
 
 
 
@@ -333,23 +336,7 @@ class rendering_task(threading.Thread):
         self.step = True
 
     def create_piece(self,piece):
-        self.step = False
-        piece.atr['obj'] = loader.loadModel(f'{piece.atr["typ"]}.dae')
-        piece.atr['obj'].reparentTo(render)
-        piece.atr['obj'].setPos(piece.atr['pos'][1]*self.game_size,piece.atr['pos'][2]*self.game_size,piece.atr['pos'][0]*self.game_size)
-        piece.atr['obj'].setScale(self.half_game_size,self.half_game_size,self.half_game_size)
-        if piece.atr['col'] == 0:
-            piece.atr['obj'].setTexture(self.colourmap['piece_0'], 1)
-            piece.atr['obj'].setHpr(0,0,180)
-        if piece.atr['col'] == 1:
-            piece.atr['obj'].setTexture(self.colourmap['piece_1'], 1)
-            piece.atr['obj'].setHpr(0,0,0)
-        piece.atr['obj'].setPythonTag('piece',piece.atr)
-        if piece.atr['pos'][2]-1 >= 0:
-            piece.atr['rel'] = self.board[piece.atr['pos'][1]-1][piece.atr['pos'][2]-1][piece.atr['pos'][0]-1]
-            self.board[piece.atr['pos'][1]-1][piece.atr['pos'][2]-1][piece.atr['pos'][0]-1].atr['rel'] = piece
-        self.step = True
-        self.highlight_piece(piece.atr,'piece')
+        pass
 
     def remove_piece(self,piece):
         self.step = False
@@ -400,10 +387,6 @@ class rendering_task(threading.Thread):
             self.highlight_piece(self.picked_for_move,'piece')
             self.picked_for_move = None
 
-        self.move.ox = 0
-        self.move.oy = 0
-        self.move.oz = 0
-
         try:
             mpos = base.mouseWatcherNode.getMouse()
         except:
@@ -421,15 +404,9 @@ class rendering_task(threading.Thread):
                 self.picked_for_move = pickedObj
                 self.picked_for_move.is_picked_for_move = True
                 self.highlight_piece(self.picked_for_move,'piece')
-                self.move.ox = self.picked_for_move.position[0]
-                self.move.oy = self.picked_for_move.position[1]
-                self.move.oz = self.picked_for_move.position[2]
 
     def select_capture_location(self):
 
-        self.move.nx = 0
-        self.move.ny = 0
-        self.move.nz = 0
         self.reset2()
 
         if self.picked_for_capture != None:
@@ -465,7 +442,10 @@ class rendering_task(threading.Thread):
             
             if type(pickedObj) == piece_render:
                 self.picked_for_capture = pickedObj
-                self.picked_for_capture_board = self.board[self.picked_for_capture.position[2]][self.picked_for_capture.position[1]][self.picked_for_capture.position[0]][0]
+
+                self.picked_for_capture_board = self.board
+                for i in range(self.game.dimensions-1, -1,-1):
+                    self.picked_for_capture_board = self.picked_for_capture_board[self.picked_for_capture.position[i]]
 
             if self.picked_for_capture_board != None:
                 self.picked_for_capture_board.is_picked_for_capture = True
@@ -530,15 +510,11 @@ class rendering_task(threading.Thread):
 
 
     # Merge these two
-    def run(self):
+    #def run(self):
         # self.base = ShowBase()
-        self.app = MyApp(game)
 
 
-        self.start()
-
-
-    def start(self):
+    def run(self):
 
         taskMgr.add(self.check_for_input, 'cameramove', extraArgs=[self.camera], appendTask=True)
 

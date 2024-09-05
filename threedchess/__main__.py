@@ -1,6 +1,6 @@
 #!/bin/python3
 
-import threading
+from direct.stdpy import threading
 import os
 import sys
 import traceback
@@ -23,15 +23,19 @@ sys.excepthook = show_exception_and_exit
 class piece:
     def __init__(self,typ,pos,col):
         self.atr = {'typ':typ,'pos':pos,'col':col,'first':0,'moved_last_turn':False,'ispicked1':False,'ispicked2':False}
+        for _ in range(len(self.atr['pos']),3):
+            self.atr['pos'].append(0)
 
 ##
 
 class game():
+    def __init__(self, dimensions = 3, size_of_dimensions = [8,8,8]):
+        self.dimensions = dimensions
+        self.size_of_dimensions = size_of_dimensions
+        for i in range(dimensions, 3):
+            self.size_of_dimensions[i] = 1
+
     def restart(self):
-
-        self.dimensions = 3
-        self.size_of_dimensions = [8,8,8]
-
         print('Controls:')
         print('Space to go up')
         print('"z" to go down')
@@ -59,167 +63,213 @@ class game():
         print('ex:a7u c5u\n')
 
         self.turn = 1
-        self.capturedposw = 0
-        self.capturedposb = 0
+        self.capturedposw = None
+        self.capturedposb = None
         self.moved_from_last_turn = [None,None,None]
         self.enpass = [None,None,None]
-        self.gameover = 0
+        self.gameover = False
 
-        self.king1     = piece('king',    [0, 4, 0],0)
-        self.pawn1     = piece('pawn',    [1, 0, 2],0)
-        self.pawn2     = piece('pawn',    [1, 1, 2],0)
-        self.pawn3     = piece('pawn',    [1, 2, 2],0)
-        self.pawn4     = piece('pawn',    [1, 3, 2],0)
-        self.pawn5     = piece('pawn',    [1, 4, 2],0)
-        self.pawn6     = piece('pawn',    [1, 5, 2],0)
-        self.pawn7     = piece('pawn',    [1, 6, 2],0)
-        self.pawn8     = piece('pawn',    [1, 7, 2],0)
-        self.pawn9     = piece('pawn',    [2, 0, 1],0)
-        self.pawn10    = piece('pawn',    [2, 1, 1],0)
-        self.pawn11    = piece('pawn',    [2, 2, 1],0)
-        self.pawn12    = piece('pawn',    [2, 3, 1],0)
-        self.pawn13    = piece('pawn',    [2, 4, 1],0)
-        self.pawn14    = piece('pawn',    [2, 5, 1],0)
-        self.pawn15    = piece('pawn',    [2, 6, 1],0)
-        self.pawn16    = piece('pawn',    [2, 7, 1],0)
-        self.peasant1  = piece('peasant', [0, 0, 2],0)
-        self.peasant2  = piece('peasant', [0, 1, 2],0)
-        self.peasant3  = piece('peasant', [0, 2, 2],0)
-        self.peasant4  = piece('peasant', [0, 3, 2],0)
-        self.peasant5  = piece('peasant', [0, 4, 2],0)
-        self.peasant6  = piece('peasant', [0, 5, 2],0)
-        self.peasant7  = piece('peasant', [0, 6, 2],0)
-        self.peasant8  = piece('peasant', [0, 7, 2],0)
-        self.peasant9  = piece('peasant', [2, 0, 0],0)
-        self.peasant10 = piece('peasant', [2, 1, 0],0)
-        self.peasant11 = piece('peasant', [2, 2, 0],0)
-        self.peasant12 = piece('peasant', [2, 3, 0],0)
-        self.peasant13 = piece('peasant', [2, 4, 0],0)
-        self.peasant14 = piece('peasant', [2, 5, 0],0)
-        self.peasant15 = piece('peasant', [2, 6, 0],0)
-        self.peasant16 = piece('peasant', [2, 7, 0],0)
-        self.soldier1  = piece('soldier', [2, 0, 2],0)
-        self.soldier2  = piece('soldier', [2, 1, 2],0)
-        self.soldier3  = piece('soldier', [2, 2, 2],0)
-        self.soldier4  = piece('soldier', [2, 3, 2],0)
-        self.soldier5  = piece('soldier', [2, 4, 2],0)
-        self.soldier6  = piece('soldier', [2, 5, 2],0)
-        self.soldier7  = piece('soldier', [2, 6, 2],0)
-        self.soldier8  = piece('soldier', [2, 7, 2],0)
-        self.knight1   = piece('knight',  [0, 0, 1],0)
-        self.knight2   = piece('knight',  [1, 3, 1],0)
-        self.knight3   = piece('knight',  [1, 4, 1],0)
-        self.knight4   = piece('knight',  [0, 7, 1],0)
-        self.horse1    = piece('horse',   [1, 0, 1],0)
-        self.horse2    = piece('horse',   [0, 1, 1],0)
-        self.horse3    = piece('horse',   [0, 6, 1],0)
-        self.horse4    = piece('horse',   [1, 7, 1],0)
-        self.elephant1 = piece('elephant',[1, 0, 0],0)
-        self.elephant2 = piece('elephant',[1, 1, 1],0)
-        self.elephant3 = piece('elephant',[1, 6, 1],0)
-        self.elephant4 = piece('elephant',[1, 7, 0],0)
-        self.rook1     = piece('rook',    [0, 0, 0],0)
-        self.rook2     = piece('rook',    [1, 2, 1],0)
-        self.rook3     = piece('rook',    [1, 5, 1],0)
-        self.rook4     = piece('rook',    [0, 7, 0],0)
-        self.bishop1   = piece('bishop',  [1, 1, 0],0)
-        self.bishop2   = piece('bishop',  [0, 2, 1],0)
-        self.bishop3   = piece('bishop',  [0, 5, 1],0)
-        self.bishop4   = piece('bishop',  [1, 6, 0],0)
-        self.cardinal1 = piece('cardinal',[0, 1, 0],0)
-        self.cardinal2 = piece('cardinal',[1, 2, 0],0)
-        self.cardinal3 = piece('cardinal',[1, 5, 0],0)
-        self.cardinal4 = piece('cardinal',[0, 6, 0],0)
-        self.queen1    = piece('queen',   [0, 2, 0],0)
-        self.queen2    = piece('queen',   [0, 5, 0],0)
-        self.duchess1  = piece('duchess', [1, 3, 0],0)
-        self.duchess2  = piece('duchess', [1, 4, 0],0)
-        self.princess1 = piece('princess',[0, 3, 1],0)
-        self.princess2 = piece('princess',[0, 4, 1],0)
-        self.pope1     = piece('pope',    [0, 3, 0],0)
+        self.board = self.create_board([0,0,0], self.dimensions)
 
-        self.king2     = piece('king',    [7, 4, 7],1)
-        self.pawn17    = piece('pawn',    [6, 0, 5],1)
-        self.pawn18    = piece('pawn',    [6, 1, 5],1)
-        self.pawn19    = piece('pawn',    [6, 2, 5],1)
-        self.pawn20    = piece('pawn',    [6, 3, 5],1)
-        self.pawn21    = piece('pawn',    [6, 4, 5],1)
-        self.pawn22    = piece('pawn',    [6, 5, 5],1)
-        self.pawn23    = piece('pawn',    [6, 6, 5],1)
-        self.pawn24    = piece('pawn',    [6, 7, 5],1)
-        self.pawn25    = piece('pawn',    [5, 0, 6],1)
-        self.pawn26    = piece('pawn',    [5, 1, 6],1)
-        self.pawn27    = piece('pawn',    [5, 2, 6],1)
-        self.pawn28    = piece('pawn',    [5, 3, 6],1)
-        self.pawn29    = piece('pawn',    [5, 4, 6],1)
-        self.pawn30    = piece('pawn',    [5, 5, 6],1)
-        self.pawn31    = piece('pawn',    [5, 6, 6],1)
-        self.pawn32    = piece('pawn',    [5, 7, 6],1)
-        self.peasant17 = piece('peasant', [7, 0, 5],1)
-        self.peasant18 = piece('peasant', [7, 1, 5],1)
-        self.peasant19 = piece('peasant', [7, 2, 5],1)
-        self.peasant20 = piece('peasant', [7, 3, 5],1)
-        self.peasant21 = piece('peasant', [7, 4, 5],1)
-        self.peasant22 = piece('peasant', [7, 5, 5],1)
-        self.peasant23 = piece('peasant', [7, 6, 5],1)
-        self.peasant24 = piece('peasant', [7, 7, 5],1)
-        self.peasant25 = piece('peasant', [5, 0, 7],1)
-        self.peasant26 = piece('peasant', [5, 1, 7],1)
-        self.peasant27 = piece('peasant', [5, 2, 7],1)
-        self.peasant28 = piece('peasant', [5, 3, 7],1)
-        self.peasant29 = piece('peasant', [5, 4, 7],1)
-        self.peasant30 = piece('peasant', [5, 5, 7],1)
-        self.peasant31 = piece('peasant', [5, 6, 7],1)
-        self.peasant32 = piece('peasant', [5, 7, 7],1)
-        self.soldier9  = piece('soldier', [5, 0, 5],1)
-        self.soldier10 = piece('soldier', [5, 1, 5],1)
-        self.soldier11 = piece('soldier', [5, 2, 5],1)
-        self.soldier12 = piece('soldier', [5, 3, 5],1)
-        self.soldier13 = piece('soldier', [5, 4, 5],1)
-        self.soldier14 = piece('soldier', [5, 5, 5],1)
-        self.soldier15 = piece('soldier', [5, 6, 5],1)
-        self.soldier16 = piece('soldier', [5, 7, 5],1)
-        self.knight5   = piece('knight',  [7, 0, 6],1)
-        self.knight6   = piece('knight',  [6, 3, 6],1)
-        self.knight7   = piece('knight',  [6, 4, 6],1)
-        self.knight8   = piece('knight',  [7, 7, 6],1)
-        self.horse5    = piece('horse',   [6, 0, 6],1)
-        self.horse6    = piece('horse',   [7, 1, 6],1)
-        self.horse7    = piece('horse',   [7, 6, 6],1)
-        self.horse8    = piece('horse',   [6, 7, 6],1)
-        self.elephant5 = piece('elephant',[6, 0, 7],1)
-        self.elephant6 = piece('elephant',[6, 1, 6],1)
-        self.elephant7 = piece('elephant',[6, 6, 6],1)
-        self.elephant8 = piece('elephant',[6, 7, 7],1)
-        self.rook5     = piece('rook',    [7, 0, 7],1)
-        self.rook6     = piece('rook',    [6, 2, 6],1)
-        self.rook7     = piece('rook',    [6, 5, 6],1)
-        self.rook8     = piece('rook',    [7, 7, 7],1)
-        self.bishop5   = piece('bishop',  [6, 1, 7],1)
-        self.bishop6   = piece('bishop',  [7, 2, 6],1)
-        self.bishop7   = piece('bishop',  [7, 5, 6],1)
-        self.bishop8   = piece('bishop',  [6, 6, 7],1)
-        self.cardinal5 = piece('cardinal',[7, 1, 7],1)
-        self.cardinal6 = piece('cardinal',[6, 2, 7],1)
-        self.cardinal7 = piece('cardinal',[6, 5, 7],1)
-        self.cardinal8 = piece('cardinal',[7, 6, 7],1)
-        self.queen3    = piece('queen',   [7, 2, 7],1)
-        self.queen4    = piece('queen',   [7, 5, 7],1)
-        self.duchess3  = piece('duchess', [6, 3, 7],1)
-        self.duchess4  = piece('duchess', [6, 4, 7],1)
-        self.princess3 = piece('princess',[6, 3, 6],1)
-        self.princess4 = piece('princess',[7, 4, 6],1)
-        self.pope2     = piece('pope',    [7, 3, 7],1)
+        self.pieces = []
 
-        self.pieces = [self.king1,self.pawn1,self.pawn2,self.pawn3,self.pawn4,self.pawn5,self.pawn6,self.pawn7,self.pawn8,self.pawn9,self.pawn10,self.pawn11,self.pawn12,self.pawn13,self.pawn14,self.pawn15,self.pawn16,self.peasant1,self.peasant2,self.peasant3,self.peasant4,self.peasant5,self.peasant6,self.peasant7,self.peasant8,self.peasant9,self.peasant10,self.peasant11,self.peasant12,self.peasant13,self.peasant14,self.peasant15,self.peasant16,self.soldier1,self.soldier2,self.soldier3,self.soldier4,self.soldier5,self.soldier6,self.soldier7,self.soldier8,self.knight1,self.knight2,self.knight3,self.knight4,self.horse1,self.horse2,self.horse3,self.horse4,self.elephant1,self.elephant2,self.elephant3,self.elephant4,self.rook1,self.rook2,self.rook3,self.rook4,self.bishop1,self.bishop2,self.bishop3,self.bishop4,self.cardinal1,self.cardinal2,self.cardinal3,self.cardinal4,self.queen1,self.queen2,self.duchess1,self.duchess2,self.princess1,self.princess2,self.pope1,self.king2,self.pawn17,self.pawn18,self.pawn19,self.pawn20,self.pawn21,self.pawn22,self.pawn23,self.pawn24,self.pawn25,self.pawn26,self.pawn27,self.pawn28,self.pawn29,self.pawn30,self.pawn31,self.pawn32,self.peasant17,self.peasant18,self.peasant19,self.peasant20,self.peasant21,self.peasant22,self.peasant23,self.peasant24,self.peasant25,self.peasant26,self.peasant27,self.peasant28,self.peasant29,self.peasant30,self.peasant31,self.peasant32,self.soldier9,self.soldier10,self.soldier11,self.soldier12,self.soldier13,self.soldier14,self.soldier15,self.soldier16,self.knight5,self.knight6,self.knight7,self.knight8,self.horse5,self.horse6,self.horse7,self.horse8,self.elephant5,self.elephant6,self.elephant7,self.elephant8,self.rook5,self.rook6,self.rook7,self.rook8,self.bishop5,self.bishop6,self.bishop7,self.bishop8,self.cardinal5,self.cardinal6,self.cardinal7,self.cardinal8,self.queen3,self.queen4,self.duchess3,self.duchess4,self.princess3,self.princess4,self.pope2]
-        self.piecess = ['king1','pawn1','pawn2','pawn3','pawn4','pawn5','pawn6','pawn7','pawn8','pawn9','pawn10','pawn11','pawn12','pawn13','pawn14','pawn15','pawn16','peasant1','peasant2','peasant3','peasant4','peasant5','peasant6','peasant7','peasant8','peasant9','peasant10','peasant11','peasant12','peasant13','peasant14','peasant15','peasant16','soldier1','soldier2','soldier3','soldier4','soldier5','soldier6','soldier7','soldier8','knight1','knight2','knight3','knight4','horse1','horse2','horse3','horse4','elephant1','elephant2','elephant3','elephant4','rook1','rook2','rook3','rook4','bishop1','bishop2','bishop3','bishop4','cardinal1','cardinal2','cardinal3','cardinal4','queen1','queen2','duchess1','duchess2','princess1','princess2','pope1','king2','pawn17','pawn18','pawn19','pawn20','pawn21','pawn22','pawn23','pawn24','pawn25','pawn26','pawn27','pawn28','pawn29','pawn30','pawn31','pawn32','peasant17','peasant18','peasant19','peasant20','peasant21','peasant22','peasant23','peasant24','peasant25','peasant26','peasant27','peasant28','peasant29','peasant30','peasant31','peasant32','soldier9','soldier10','soldier11','soldier12','soldier13','soldier14','soldier15','soldier16','knight5','knight6','knight7','knight8','horse5','horse6','horse7','horse8','elephant5','elephant6','elephant7','elephant8','rook5','rook6','rook7','rook8','bishop5','bishop6','bishop7','bishop8','cardinal5','cardinal6','cardinal7','cardinal8','queen3','queen4','duchess3','duchess4','princess3','princess4','pope2']
+        if self.dimensions == 1:
+            self.pieces.append(piece('king',    [0], 0))
+
+            self.pieces.append(piece('king',    [7], 1))
+
+        if self.dimensions == 2:
+            self.pieces.append(piece('king',    [0, 4], 0))
+            self.pieces.append(piece('pawn',    [1, 0], 0))
+            self.pieces.append(piece('pawn',    [1, 1], 0))
+            self.pieces.append(piece('pawn',    [1, 2], 0))
+            self.pieces.append(piece('pawn',    [1, 3], 0))
+            self.pieces.append(piece('pawn',    [1, 4], 0))
+            self.pieces.append(piece('pawn',    [1, 5], 0))
+            self.pieces.append(piece('pawn',    [1, 6], 0))
+            self.pieces.append(piece('pawn',    [1, 7], 0))
+            self.pieces.append(piece('knight',  [0, 1], 0))
+            self.pieces.append(piece('knight',  [0, 6], 0))
+            self.pieces.append(piece('rook',    [0, 0], 0))
+            self.pieces.append(piece('rook',    [0, 7], 0))
+            self.pieces.append(piece('bishop',  [0, 2], 0))
+            self.pieces.append(piece('bishop',  [0, 5], 0))
+            self.pieces.append(piece('queen',   [0, 3], 0))
+
+            self.pieces.append(piece('king',    [7, 4], 1))
+            self.pieces.append(piece('pawn',    [6, 0], 1))
+            self.pieces.append(piece('pawn',    [6, 1], 1))
+            self.pieces.append(piece('pawn',    [6, 2], 1))
+            self.pieces.append(piece('pawn',    [6, 3], 1))
+            self.pieces.append(piece('pawn',    [6, 4], 1))
+            self.pieces.append(piece('pawn',    [6, 5], 1))
+            self.pieces.append(piece('pawn',    [6, 6], 1))
+            self.pieces.append(piece('pawn',    [6, 7], 1))
+            self.pieces.append(piece('knight',  [7, 1], 1))
+            self.pieces.append(piece('knight',  [7, 6], 1))
+            self.pieces.append(piece('rook',    [7, 0], 1))
+            self.pieces.append(piece('rook',    [7, 7], 1))
+            self.pieces.append(piece('bishop',  [7, 2], 1))
+            self.pieces.append(piece('bishop',  [7, 5], 1))
+            self.pieces.append(piece('queen',   [7, 3], 1))
+
+        if self.dimensions == 3:
+            self.pieces.append(piece('king',    [0, 4, 0], 0))
+            self.pieces.append(piece('pawn',    [1, 0, 2], 0))
+            self.pieces.append(piece('pawn',    [1, 1, 2], 0))
+            self.pieces.append(piece('pawn',    [1, 2, 2], 0))
+            self.pieces.append(piece('pawn',    [1, 3, 2], 0))
+            self.pieces.append(piece('pawn',    [1, 4, 2], 0))
+            self.pieces.append(piece('pawn',    [1, 5, 2], 0))
+            self.pieces.append(piece('pawn',    [1, 6, 2], 0))
+            self.pieces.append(piece('pawn',    [1, 7, 2], 0))
+            self.pieces.append(piece('pawn',    [2, 0, 1], 0))
+            self.pieces.append(piece('pawn',    [2, 1, 1], 0))
+            self.pieces.append(piece('pawn',    [2, 2, 1], 0))
+            self.pieces.append(piece('pawn',    [2, 3, 1], 0))
+            self.pieces.append(piece('pawn',    [2, 4, 1], 0))
+            self.pieces.append(piece('pawn',    [2, 5, 1], 0))
+            self.pieces.append(piece('pawn',    [2, 6, 1], 0))
+            self.pieces.append(piece('pawn',    [2, 7, 1], 0))
+            self.pieces.append(piece('peasant', [0, 0, 2], 0))
+            self.pieces.append(piece('peasant', [0, 1, 2], 0))
+            self.pieces.append(piece('peasant', [0, 2, 2], 0))
+            self.pieces.append(piece('peasant', [0, 3, 2], 0))
+            self.pieces.append(piece('peasant', [0, 4, 2], 0))
+            self.pieces.append(piece('peasant', [0, 5, 2], 0))
+            self.pieces.append(piece('peasant', [0, 6, 2], 0))
+            self.pieces.append(piece('peasant', [0, 7, 2], 0))
+            self.pieces.append(piece('peasant', [2, 0, 0], 0))
+            self.pieces.append(piece('peasant', [2, 1, 0], 0))
+            self.pieces.append(piece('peasant', [2, 2, 0], 0))
+            self.pieces.append(piece('peasant', [2, 3, 0], 0))
+            self.pieces.append(piece('peasant', [2, 4, 0], 0))
+            self.pieces.append(piece('peasant', [2, 5, 0], 0))
+            self.pieces.append(piece('peasant', [2, 6, 0], 0))
+            self.pieces.append(piece('peasant', [2, 7, 0], 0))
+            self.pieces.append(piece('soldier', [2, 0, 2], 0))
+            self.pieces.append(piece('soldier', [2, 1, 2], 0))
+            self.pieces.append(piece('soldier', [2, 2, 2], 0))
+            self.pieces.append(piece('soldier', [2, 3, 2], 0))
+            self.pieces.append(piece('soldier', [2, 4, 2], 0))
+            self.pieces.append(piece('soldier', [2, 5, 2], 0))
+            self.pieces.append(piece('soldier', [2, 6, 2], 0))
+            self.pieces.append(piece('soldier', [2, 7, 2], 0))
+            self.pieces.append(piece('knight',  [0, 0, 1], 0))
+            self.pieces.append(piece('knight',  [1, 3, 1], 0))
+            self.pieces.append(piece('knight',  [1, 4, 1], 0))
+            self.pieces.append(piece('knight',  [0, 7, 1], 0))
+            self.pieces.append(piece('horse',   [1, 0, 1], 0))
+            self.pieces.append(piece('horse',   [0, 1, 1], 0))
+            self.pieces.append(piece('horse',   [0, 6, 1], 0))
+            self.pieces.append(piece('horse',   [1, 7, 1], 0))
+            self.pieces.append(piece('elephant',[1, 0, 0], 0))
+            self.pieces.append(piece('elephant',[1, 1, 1], 0))
+            self.pieces.append(piece('elephant',[1, 6, 1], 0))
+            self.pieces.append(piece('elephant',[1, 7, 0], 0))
+            self.pieces.append(piece('rook',    [0, 0, 0], 0))
+            self.pieces.append(piece('rook',    [1, 2, 1], 0))
+            self.pieces.append(piece('rook',    [1, 5, 1], 0))
+            self.pieces.append(piece('rook',    [0, 7, 0], 0))
+            self.pieces.append(piece('bishop',  [1, 1, 0], 0))
+            self.pieces.append(piece('bishop',  [0, 2, 1], 0))
+            self.pieces.append(piece('bishop',  [0, 5, 1], 0))
+            self.pieces.append(piece('bishop',  [1, 6, 0], 0))
+            self.pieces.append(piece('cardinal',[0, 1, 0], 0))
+            self.pieces.append(piece('cardinal',[1, 2, 0], 0))
+            self.pieces.append(piece('cardinal',[1, 5, 0], 0))
+            self.pieces.append(piece('cardinal',[0, 6, 0], 0))
+            self.pieces.append(piece('queen',   [0, 2, 0], 0))
+            self.pieces.append(piece('queen',   [0, 5, 0], 0))
+            self.pieces.append(piece('duchess', [1, 3, 0], 0))
+            self.pieces.append(piece('duchess', [1, 4, 0], 0))
+            self.pieces.append(piece('princess',[0, 3, 1], 0))
+            self.pieces.append(piece('princess',[0, 4, 1], 0))
+            self.pieces.append(piece('pope',    [0, 3, 0], 0))
+
+            self.pieces.append(piece('king',    [7, 4, 7], 1))
+            self.pieces.append(piece('pawn',    [6, 0, 5], 1))
+            self.pieces.append(piece('pawn',    [6, 1, 5], 1))
+            self.pieces.append(piece('pawn',    [6, 2, 5], 1))
+            self.pieces.append(piece('pawn',    [6, 3, 5], 1))
+            self.pieces.append(piece('pawn',    [6, 4, 5], 1))
+            self.pieces.append(piece('pawn',    [6, 5, 5], 1))
+            self.pieces.append(piece('pawn',    [6, 6, 5], 1))
+            self.pieces.append(piece('pawn',    [6, 7, 5], 1))
+            self.pieces.append(piece('pawn',    [5, 0, 6], 1))
+            self.pieces.append(piece('pawn',    [5, 1, 6], 1))
+            self.pieces.append(piece('pawn',    [5, 2, 6], 1))
+            self.pieces.append(piece('pawn',    [5, 3, 6], 1))
+            self.pieces.append(piece('pawn',    [5, 4, 6], 1))
+            self.pieces.append(piece('pawn',    [5, 5, 6], 1))
+            self.pieces.append(piece('pawn',    [5, 6, 6], 1))
+            self.pieces.append(piece('pawn',    [5, 7, 6], 1))
+            self.pieces.append(piece('peasant', [7, 0, 5], 1))
+            self.pieces.append(piece('peasant', [7, 1, 5], 1))
+            self.pieces.append(piece('peasant', [7, 2, 5], 1))
+            self.pieces.append(piece('peasant', [7, 3, 5], 1))
+            self.pieces.append(piece('peasant', [7, 4, 5], 1))
+            self.pieces.append(piece('peasant', [7, 5, 5], 1))
+            self.pieces.append(piece('peasant', [7, 6, 5], 1))
+            self.pieces.append(piece('peasant', [7, 7, 5], 1))
+            self.pieces.append(piece('peasant', [5, 0, 7], 1))
+            self.pieces.append(piece('peasant', [5, 1, 7], 1))
+            self.pieces.append(piece('peasant', [5, 2, 7], 1))
+            self.pieces.append(piece('peasant', [5, 3, 7], 1))
+            self.pieces.append(piece('peasant', [5, 4, 7], 1))
+            self.pieces.append(piece('peasant', [5, 5, 7], 1))
+            self.pieces.append(piece('peasant', [5, 6, 7], 1))
+            self.pieces.append(piece('peasant', [5, 7, 7], 1))
+            self.pieces.append(piece('soldier', [5, 0, 5], 1))
+            self.pieces.append(piece('soldier', [5, 1, 5], 1))
+            self.pieces.append(piece('soldier', [5, 2, 5], 1))
+            self.pieces.append(piece('soldier', [5, 3, 5], 1))
+            self.pieces.append(piece('soldier', [5, 4, 5], 1))
+            self.pieces.append(piece('soldier', [5, 5, 5], 1))
+            self.pieces.append(piece('soldier', [5, 6, 5], 1))
+            self.pieces.append(piece('soldier', [5, 7, 5], 1))
+            self.pieces.append(piece('knight',  [7, 0, 6], 1))
+            self.pieces.append(piece('knight',  [6, 3, 6], 1))
+            self.pieces.append(piece('knight',  [6, 4, 6], 1))
+            self.pieces.append(piece('knight',  [7, 7, 6], 1))
+            self.pieces.append(piece('horse',   [6, 0, 6], 1))
+            self.pieces.append(piece('horse',   [7, 1, 6], 1))
+            self.pieces.append(piece('horse',   [7, 6, 6], 1))
+            self.pieces.append(piece('horse',   [6, 7, 6], 1))
+            self.pieces.append(piece('elephant',[6, 0, 7], 1))
+            self.pieces.append(piece('elephant',[6, 1, 6], 1))
+            self.pieces.append(piece('elephant',[6, 6, 6], 1))
+            self.pieces.append(piece('elephant',[6, 7, 7], 1))
+            self.pieces.append(piece('rook',    [7, 0, 7], 1))
+            self.pieces.append(piece('rook',    [6, 2, 6], 1))
+            self.pieces.append(piece('rook',    [6, 5, 6], 1))
+            self.pieces.append(piece('rook',    [7, 7, 7], 1))
+            self.pieces.append(piece('bishop',  [6, 1, 7], 1))
+            self.pieces.append(piece('bishop',  [7, 2, 6], 1))
+            self.pieces.append(piece('bishop',  [7, 5, 6], 1))
+            self.pieces.append(piece('bishop',  [6, 6, 7], 1))
+            self.pieces.append(piece('cardinal',[7, 1, 7], 1))
+            self.pieces.append(piece('cardinal',[6, 2, 7], 1))
+            self.pieces.append(piece('cardinal',[6, 5, 7], 1))
+            self.pieces.append(piece('cardinal',[7, 6, 7], 1))
+            self.pieces.append(piece('queen',   [7, 2, 7], 1))
+            self.pieces.append(piece('queen',   [7, 5, 7], 1))
+            self.pieces.append(piece('duchess', [6, 3, 7], 1))
+            self.pieces.append(piece('duchess', [6, 4, 7], 1))
+            self.pieces.append(piece('princess',[6, 3, 6], 1))
+            self.pieces.append(piece('princess',[7, 4, 6], 1))
+            self.pieces.append(piece('pope',    [7, 3, 7], 1))
+
+        #
+        return
+        #
 
         self.create(f'{home}/public/pieces.txt',len(self.pieces))
         self.create(f'{home}/public/misc.txt',6)
 
         self.save = []
         for u in range(0,len(self.pieces)):
-            self.save.append(self.piecess[u]+': '+f'[{self.pieces[u].atr["typ"]},({self.pieces[u].atr["pos"][0]},{self.pieces[u].atr["pos"][1]},{self.pieces[u].atr["pos"][2]}),{self.pieces[u].atr["col"]},{self.pieces[u].atr["first"]},{self.pieces[u].atr["moved_last_turn"]}]'+'\n')
+            self.save.append(self.pieces[u].atr['typ']+': '+f'[{self.pieces[u].atr["typ"]},({self.pieces[u].atr["pos"][0]},{self.pieces[u].atr["pos"][1]},{self.pieces[u].atr["pos"][2]}),{self.pieces[u].atr["col"]},{self.pieces[u].atr["first"]},{self.pieces[u].atr["moved_last_turn"]}]'+'\n')
         self.writer = open(f'{home}/public/pieces.txt', 'w')
         self.writer.writelines(self.save)
         self.writer.close()
@@ -229,6 +279,20 @@ class game():
         self.write(f'{home}/public/misc.txt','moved_from_last_turn: ',f'({self.moved_from_last_turn[0]},{self.moved_from_last_turn[1]},{self.moved_from_last_turn[2]})',3)
         self.write(f'{home}/public/misc.txt','enpass: ',f'({self.enpass[0]},{self.enpass[1]},{self.enpass[2]})',4)
         self.write(f'{home}/public/misc.txt','gameover: ',str(self.gameover),5)
+
+    def create_board(self, pos, dimensions):
+        if dimensions == 0:
+            return None
+        else:
+            board = []
+            for sub_board in range(0,self.size_of_dimensions[dimensions-1]):
+                sub_board_pos = pos.copy()
+                sub_board_pos[dimensions-1] = sub_board
+                board.append(self.create_board(pos, dimensions-1))
+
+            return board
+
+
 
     def open(self):
         print('Controls:')
@@ -341,7 +405,6 @@ class game():
         self.writer.writelines(self.save)
         self.writer.close()
 
-game = game()
 
 ##
 
@@ -717,21 +780,14 @@ class read():
             move.nz = 8
 
 class movement:
-    def __init__(self):
-        self.ox = 0
-        self.oy = 0
-        self.oz = 0
-        self.nx = 0
-        self.ny = 0
-        self.nz = 0
-        self.castlingvar = False
+    def __init__(self, old_position, new_position, castling_movement = False):
+        self.old_position = old_position
+        self.new_position = new_position
+        self.distance_between_positions = [abs(self.old_position[i] - self.new_position[i]) for i in range(0,3)]
+
+        self.castling_movement = castling_movement
 
     def findpiece(self):
-        self.enpass2 = [None,None,None]
-        self.dx = abs(self.ox-self.nx)
-        self.dy = abs(self.oy-self.ny)
-        self.dz = abs(self.oz-self.nz)
-        self.dl = sorted((self.dx,self.dy,self.dz))
         piece_found = 0
         for u in range(0,len(game.pieces)):
             if game.pieces[u].atr['pos'][0] == self.ox and game.pieces[u].atr['pos'][1] == self.oy and game.pieces[u].atr['pos'][2] == self.oz:
@@ -1139,6 +1195,7 @@ class movement:
 ##
 
 home = "../3dchess"
+game = game(3)
 
 while True:
     print('Load from a saved file? (y/n)')
@@ -1153,15 +1210,12 @@ while True:
     else:
         print('This is not a valid selection\n')
 
+## Main task
 read = read()
-move = movement()
-move.move3 = None
-
-
+thread = threading.Thread(target = read.stuff)
+thread.start()
 
 ## Panda3d task
-#Change name to render
-app = rendering_task(move, game)
-app.start()
-
-read.stuff()
+#Fix input
+app = rendering_task(game)
+app.run()

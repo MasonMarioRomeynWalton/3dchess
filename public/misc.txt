@@ -1,6 +1,6 @@
-turn: 1
-capturedposw: 0
-capturedposb: 0
-moved_from_last_turn: (None,None,None)
-enpass: (None,None,None)
-gameover: 0
+
+
+
+
+
+

@@ -63,8 +63,8 @@ class controlable_camera():
         Initializes the camera for the center
         """
 
-        self.pitch = 0
-        self.yaw = 0
+        self.pitch = pi/2
+        self.yaw = -pi/2
         self.x_pos = 0
         self.y_pos = 0
         self.z_pos = 0
