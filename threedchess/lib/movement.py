@@ -1,37 +1,49 @@
 class move:
-    def __init__(self, old_position, new_position, castling_movement = False):
+    def __init__(self, game, old_position, new_position, castling_movement = False):
+
+        self.game = game
 
         ## The old position of the piece
         self.old_position = old_position
+
+        ## The new position of the piece
         self.new_position = new_position
+
         self.distance_between_positions = [
-            abs(self.old_position[i] - self.new_position[i]) for i in range(0,3)
+            abs(self.old_position[i] - self.new_position[i]) for i in range(0,self.game.dimensions)
         ]
 
+        # Not sure
         self.castling_movement = castling_movement
 
-    def findpiece(self):
-        piece_found = 0
-        for u in range(0,len(game.pieces)):
-            if game.pieces[u].atr['pos'][0] == self.ox and game.pieces[u].atr['pos'][1] == self.oy and game.pieces[u].atr['pos'][2] == self.oz:
-                self.term = u
-                self.piece = game.pieces[u]
-                self.process()
-                piece_found = 1
-        if piece_found == 0:
-            print('This is not a valid piece\n')
+        self.findpiece()
 
-    def process(self):
-        self.valid = 1
-        if game.gameover == 1 or game.gameover == 2:
-            print('The game is already over!\n')
-            self.valid = 0
-            return
-        if self.ox == self.nx and self.oy == self.ny and self.oz == self.nz:
+
+    ## Finds the piece returns whether the move is valid
+    def findpiece(self):
+
+        ## If two locations are the same
+        if all(self.old_position[i] == self.new_position[i] for i in range(0,self.game.dimensions)):
             print('The two specified locations must be different\n')
             self.valid = 0
-            return
-        if not self.piece.atr['col'] == game.turn:
+            return 0
+
+
+        self.piece = self.game.board
+        ## Go through the current board to find the piece
+        for dimension in range(self.game.dimensions-1, -1, -1):
+            self.piece = self.piece[self.old_position[dimension]]
+        if self.piece == None:
+            print('This is not a valid piece\n')
+            return 0
+        else:
+            return self.process()
+
+    def process(self):
+        if self.game.gameover == 1 or self.game.gameover == 2:
+            print('The game is already over!\n')
+            return 0
+        if not self.piece.colour == self.game.turn:
             print('This piece is not a valid colour\n')
             self.valid = 0
             return

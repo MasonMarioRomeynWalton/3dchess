@@ -1,4 +1,4 @@
-#!/home/mason/Documents/python/Chess/3dchess/.venv/bin/python3
+#!/home/mason/Documents/python/Chess/3dchess/.venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

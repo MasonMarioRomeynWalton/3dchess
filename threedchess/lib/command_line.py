@@ -1,5 +1,4 @@
-
-## Changes the move input to a list of numbers
+from . import move 
 
 def game_help_menu():
     while True:
@@ -210,8 +209,9 @@ def check_move_input(command, game):
         return
     
     ## If all is good, run move
-    move(old_location, new_location)
+    move(game, old_location, new_location)
 
+## Changes the move input to a list of numbers
 def alpha_position_to_list(h):
     # Make work for any length of dimensions
     coordinates = [] 

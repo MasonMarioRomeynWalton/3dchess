@@ -1,3 +1,8 @@
+import numpy
+
+home = "../3dchess"
+import os
+
 class game():
     def __init__(self, across_dimensions = 2, side_dimensions = 1, size_of_dimensions = [8,8,8]):
         self.across_dimensions = across_dimensions
@@ -30,7 +35,8 @@ class game():
 
             self.create_piece(('king',    [7], 1))
 
-        if self.dimensions == 3:
+        ## Layout for 2 dimensions
+        if self.dimensions == 2:
             
             self.create_piece('king',    [0, 4], 0)
             self.create_piece_row('pawn', [1], 0)
@@ -52,6 +58,7 @@ class game():
             self.create_piece('bishop',  [7, 5], 1)
             self.create_piece('queen',   [7, 3], 1)
 
+        ## Layout for 3 dimesions
         if self.dimensions == 3:
             self.create_piece('king',    [0, 0, 4], 0)
             self.create_piece_row('pawn', [1, 2], 0)
@@ -130,9 +137,11 @@ class game():
             self.create_piece('pope',    [7, 7, 3], 1)
 
         for piece in self.pieces:
-            related_board = self.board.copy()
-            for dimension in range(2, -1, -1):
-                related_board = related_board[piece.position[dimension]]
+            ## Go through the n-d array to find board
+            view = self.board.view()
+            for dimension in range(self.dimensions-1, 0, -1):
+                view = view[piece.position[dimension]].view()
+            view[piece.position[0]] = piece
 
         #
         return
@@ -142,8 +151,8 @@ class game():
         self.create(f'{home}/public/misc.txt',6)
 
         self.save = []
-        for u in range(0,len(self.pieces)):
-            self.save.append(self.pieces[u].atr['typ']+': '+f'[{self.pieces[u].atr["typ"]},({self.pieces[u].atr["pos"][0]},{self.pieces[u].atr["pos"][1]},{self.pieces[u].atr["pos"][2]}),{self.pieces[u].atr["col"]},{self.pieces[u].atr["first"]},{self.pieces[u].atr["moved_last_turn"]}]'+'\n')
+        for piece in self.pieces:
+            self.save.append(piece.piece_type+': '+f'[{piece.piece_type},({piece.atr["pos"][0]},{piece.atr["pos"][1]},{piece.atr["pos"][2]}),{piece.atr["col"]},{piece.atr["first"]},{piece.atr["moved_last_turn"]}]'+'\n')
         self.writer = open(f'{home}/public/pieces.txt', 'w')
         self.writer.writelines(self.save)
         self.writer.close()
@@ -172,6 +181,8 @@ class game():
 
 
     def create_board(self, pos, dimensions):
+        return numpy.empty(self.size_of_dimensions, dtype=object)
+
         if dimensions == 0:
             return None
         else:
@@ -258,19 +269,23 @@ class game():
             z[4] = False
         return(z)
 
-    def write(self,file,prefix,content,x):
+    def write(self,file,prefix,content,piece_num):
         self.reader = open(file,'r')
         self.save = self.reader.readlines()
-        self.space = self.save[x].find(' ')
+        self.space = self.save[piece_num].find(' ')
         if prefix == None:
-            self.name = self.save[x][0:self.space+1]
+            self.name = self.save[piece_num][0:self.space+1]
         else:
             self.name = prefix
-        self.save[x] = (self.name+content+'\n')
+        self.save[piece_num] = (self.name+content+'\n')
         self.reader.close()
         self.writer = open(file,'w')
         self.writer.writelines(self.save)
         self.writer.close()
+
+class game_board:
+    def __init__(self):
+        pass
 
 class game_piece:
     def __init__(self,piece_type,position,colour):

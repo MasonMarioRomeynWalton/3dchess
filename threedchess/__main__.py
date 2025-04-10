@@ -23,7 +23,6 @@ sys.excepthook = show_exception_and_exit
 
 ##
 
-home = "../3dchess"
 #game = game(1,1,[8,8])
 game = game(1,2,[8,8,8])
 
@@ -45,10 +44,13 @@ while True:
     else:
         print('This is not a valid selection\n')
 
+print('test')
 
 ## Main task
-thread = threading.Thread(target = main_menu.open(game), args = (game,))
+thread = threading.Thread(target = main_menu.open, args = (game,))
 thread.start()
+
+print('test2')
 
 ## Panda3d task
 #Fix input
