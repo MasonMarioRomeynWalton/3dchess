@@ -72,7 +72,7 @@ class rendering_task():
             hotkey_control(  'f',      self.camera.init_center),
             hotkey_control(  'mouse1', self.select_move_piece),
             hotkey_control(  'mouse3', self.select_capture_location),
-            hotkey_control(  'enter',  self.stuff2)
+            hotkey_control(  'enter',  self.move_piece),
         ]
 
 
@@ -468,36 +468,34 @@ class rendering_task():
 
             # Add ox ny stuff
 
-    def stuff2(self):
+    def move_piece(self):
         self.reset2()
         if self.game.gameover == 1 or self.game.gameover == 2:
             print('The game is already over!\n')
             time.sleep(0.1)
             return
         self.valid = 1
-        if self.move.ox == 0 or self.move.oy == 0 or self.move.oz == 0:
+        if self.picked_for_move == None:
             print('You must select a piece to move\n')
             self.valid = 0
-        elif self.move.oz < 0:
+        elif self.picked_for_move.position[2] < 0:
             print('You may not move a piece that has already been captured\n')
             self.valid = 0
-        if self.move.nx == 0 or self.move.ny == 0 or self.move.nz == 0:
+        if self.picked_for_capture == None:
             print('You must select a place to move to\n')
             self.valid = 0
-        elif self.move.nz < 0:
+        elif self.picked_for_capture.position[2] < 0:
             print('You may not capture a piece that has already been captured\n')
             self.valid = 0
         if self.valid == 1:
             self.move.findpiece()
-        self.move.nx = 0
-        self.move.ny = 0
-        self.move.nz = 0
+
+        self.picked_for_capture = None
+
         if hasattr(self.move,'valid'):
             if self.move.valid == 1:
                 self.reset()
-                self.move.ox = 0
-                self.move.oy = 0
-                self.move.oz = 0
+                self.picked_for_move = None
 
     ## Unused?
     def reset_piece_colour(self):

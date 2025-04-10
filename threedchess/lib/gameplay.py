@@ -30,7 +30,7 @@ class game():
 
             self.create_piece(('king',    [7], 1))
 
-        if self.dimensions == 2:
+        if self.dimensions == 3:
             
             self.create_piece('king',    [0, 4], 0)
             self.create_piece_row('pawn', [1], 0)

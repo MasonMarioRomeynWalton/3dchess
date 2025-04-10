@@ -1,5 +1,7 @@
 class move:
     def __init__(self, old_position, new_position, castling_movement = False):
+
+        ## The old position of the piece
         self.old_position = old_position
         self.new_position = new_position
         self.distance_between_positions = [

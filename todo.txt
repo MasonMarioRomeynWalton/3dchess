@@ -1,4 +1,6 @@
-finish update read
+Make move rules based on in-play pieces
+finish read
+finish update
 make move class make sense
 finish finish rendering class
 test with changing trasparency of board
