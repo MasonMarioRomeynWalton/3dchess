@@ -1,147 +1,139 @@
+import os
+
 import numpy
 
 home = "../3dchess"
-import os
 
 class game():
-    def __init__(self, across_dimensions = 2, side_dimensions = 1, size_of_dimensions = [8,8,8]):
+    def __init__(self, across_dimensions = 2, side_dimensions = 1, size_of_dimensions = (8,8,8)):
         self.across_dimensions = across_dimensions
         self.side_dimensions = side_dimensions
         self.dimensions = self.across_dimensions + self.side_dimensions
-
-        self.size_of_dimensions = [1,1,1]
-        for i in range(0, self.across_dimensions):
-            self.size_of_dimensions[i] = size_of_dimensions[i]
-
-        for i in range(0, self.side_dimensions):
-            self.size_of_dimensions[-i-1] = size_of_dimensions[-i-1]
+        self.unused_dimensions = 3 - self.dimensions
+        self.size_of_dimensions = size_of_dimensions
 
     def restart(self):
         ##For starting a game of the same type
 
-        self.turn = 1
+        self.turn = 0
         self.capturedposw = None
         self.capturedposb = None
         self.moved_from_last_turn = [None,None,None]
         self.enpass = [None,None,None]
         self.gameover = False
 
-        self.board = self.create_board([0,0,0], 3)
+        self.board = self.create_board()
 
         self.pieces = []
 
         if self.dimensions == 1:
-            self.create_piece(('king',    [0], 0))
+            self.create_piece('king',    (0,), 0)
 
-            self.create_piece(('king',    [7], 1))
+            self.create_piece('king',    (7,), 1)
 
         ## Layout for 2 dimensions
         if self.dimensions == 2:
             
-            self.create_piece('king',    [0, 4], 0)
-            self.create_piece_row('pawn', [1], 0)
-            self.create_piece('knight',  [0, 1], 0)
-            self.create_piece('knight',  [0, 6], 0)
-            self.create_piece('rook',    [0, 0], 0)
-            self.create_piece('rook',    [0, 7], 0)
-            self.create_piece('bishop',  [0, 2], 0)
-            self.create_piece('bishop',  [0, 5], 0)
-            self.create_piece('queen',   [0, 3], 0)
+            self.create_piece('king',    (0, 4), 0)
+            self.create_piece_row('pawn', (1,), 0)
+            self.create_piece('knight',  (0, 1), 0)
+            self.create_piece('knight',  (0, 6), 0)
+            self.create_piece('rook',    (0, 0), 0)
+            self.create_piece('rook',    (0, 7), 0)
+            self.create_piece('bishop',  (0, 2), 0)
+            self.create_piece('bishop',  (0, 5), 0)
+            self.create_piece('queen',   (0, 3), 0)
 
-            self.create_piece('king',    [7, 4], 1)
-            self.create_piece_row('pawn', [self.size_of_dimensions[0]-2], 1)
-            self.create_piece('knight',  [7, 1], 1)
-            self.create_piece('knight',  [7, 6], 1)
-            self.create_piece('rook',    [7, 0], 1)
-            self.create_piece('rook',    [7, 7], 1)
-            self.create_piece('bishop',  [7, 2], 1)
-            self.create_piece('bishop',  [7, 5], 1)
-            self.create_piece('queen',   [7, 3], 1)
+            self.create_piece('king',    (7, 4), 1)
+            self.create_piece_row('pawn', (self.size_of_dimensions[0]-2,), 1)
+            self.create_piece('knight',  (7, 1), 1)
+            self.create_piece('knight',  (7, 6), 1)
+            self.create_piece('rook',    (7, 0), 1)
+            self.create_piece('rook',    (7, 7), 1)
+            self.create_piece('bishop',  (7, 2), 1)
+            self.create_piece('bishop',  (7, 5), 1)
+            self.create_piece('queen',   (7, 3), 1)
 
         ## Layout for 3 dimesions
         if self.dimensions == 3:
-            self.create_piece('king',    [0, 0, 4], 0)
-            self.create_piece_row('pawn', [1, 2], 0)
-            self.create_piece_row('pawn', [2, 1], 0)
-            self.create_piece_row('peasant', [0, 2], 0)
-            self.create_piece_row('peasant', [2, 0], 0)
-            self.create_piece_row('soldier', [2, 2], 0)
-            self.create_piece('knight',  [0, 1, 0], 0)
-            self.create_piece('knight',  [1, 1, 3], 0)
-            self.create_piece('knight',  [1, 1, 4], 0)
-            self.create_piece('knight',  [0, 1, 7], 0)
-            self.create_piece('horse',   [1, 1, 0], 0)
-            self.create_piece('horse',   [0, 1, 1], 0)
-            self.create_piece('horse',   [0, 1, 6], 0)
-            self.create_piece('horse',   [1, 1, 7], 0)
-            self.create_piece('elephant',[1, 0, 0], 0)
-            self.create_piece('elephant',[1, 1, 1], 0)
-            self.create_piece('elephant',[1, 1, 6], 0)
-            self.create_piece('elephant',[1, 0, 7], 0)
-            self.create_piece('rook',    [0, 0, 0], 0)
-            self.create_piece('rook',    [1, 1, 2], 0)
-            self.create_piece('rook',    [1, 1, 5], 0)
-            self.create_piece('rook',    [0, 0, 7], 0)
-            self.create_piece('bishop',  [1, 0, 1], 0)
-            self.create_piece('bishop',  [0, 1, 2], 0)
-            self.create_piece('bishop',  [0, 1, 5], 0)
-            self.create_piece('bishop',  [1, 0, 6], 0)
-            self.create_piece('cardinal',[0, 0, 1], 0)
-            self.create_piece('cardinal',[1, 0, 2], 0)
-            self.create_piece('cardinal',[1, 0, 5], 0)
-            self.create_piece('cardinal',[0, 0, 6], 0)
-            self.create_piece('queen',   [0, 0, 2], 0)
-            self.create_piece('queen',   [0, 0, 5], 0)
-            self.create_piece('duchess', [1, 0, 3], 0)
-            self.create_piece('duchess', [1, 0, 4], 0)
-            self.create_piece('princess',[0, 1, 3], 0)
-            self.create_piece('princess',[0, 1, 4], 0)
-            self.create_piece('pope',    [0, 0, 3], 0)
+            self.create_piece('king',    (0, 0, 4), 0)
+            self.create_piece_row('pawn', (1, 2), 0)
+            self.create_piece_row('pawn', (2, 1), 0)
+            self.create_piece_row('peasant', (0, 2), 0)
+            self.create_piece_row('peasant', (2, 0), 0)
+            self.create_piece_row('soldier', (2, 2), 0)
+            self.create_piece('knight',  (0, 1, 0), 0)
+            self.create_piece('knight',  (1, 1, 3), 0)
+            self.create_piece('knight',  (1, 1, 4), 0)
+            self.create_piece('knight',  (0, 1, 7), 0)
+            self.create_piece('horse',   (1, 1, 0), 0)
+            self.create_piece('horse',   (0, 1, 1), 0)
+            self.create_piece('horse',   (0, 1, 6), 0)
+            self.create_piece('horse',   (1, 1, 7), 0)
+            self.create_piece('elephant',(1, 0, 0), 0)
+            self.create_piece('elephant',(1, 1, 1), 0)
+            self.create_piece('elephant',(1, 1, 6), 0)
+            self.create_piece('elephant',(1, 0, 7), 0)
+            self.create_piece('rook',    (0, 0, 0), 0)
+            self.create_piece('rook',    (1, 1, 2), 0)
+            self.create_piece('rook',    (1, 1, 5), 0)
+            self.create_piece('rook',    (0, 0, 7), 0)
+            self.create_piece('bishop',  (1, 0, 1), 0)
+            self.create_piece('bishop',  (0, 1, 2), 0)
+            self.create_piece('bishop',  (0, 1, 5), 0)
+            self.create_piece('bishop',  (1, 0, 6), 0)
+            self.create_piece('cardinal',(0, 0, 1), 0)
+            self.create_piece('cardinal',(1, 0, 2), 0)
+            self.create_piece('cardinal',(1, 0, 5), 0)
+            self.create_piece('cardinal',(0, 0, 6), 0)
+            self.create_piece('queen',   (0, 0, 2), 0)
+            self.create_piece('queen',   (0, 0, 5), 0)
+            self.create_piece('duchess', (1, 0, 3), 0)
+            self.create_piece('duchess', (1, 0, 4), 0)
+            self.create_piece('princess',(0, 1, 3), 0)
+            self.create_piece('princess',(0, 1, 4), 0)
+            self.create_piece('pope',    (0, 0, 3), 0)
 
-            self.create_piece('king',    [7, 7, 4], 1)
-            self.create_piece_row('pawn', [self.size_of_dimensions[0]-2, self.size_of_dimensions[1]-3], 1)
-            self.create_piece_row('pawn', [self.size_of_dimensions[0]-3, self.size_of_dimensions[1]-2], 1)
-            self.create_piece_row('peasant', [self.size_of_dimensions[0]-1, self.size_of_dimensions[1]-3], 1)
-            self.create_piece_row('peasant', [self.size_of_dimensions[0]-3, self.size_of_dimensions[1]-1], 1)
-            self.create_piece_row('soldier', [self.size_of_dimensions[0]-3, self.size_of_dimensions[1]-3], 1)
-            self.create_piece('knight',  [7, 6, 0], 1)
-            self.create_piece('knight',  [6, 6, 3], 1)
-            self.create_piece('knight',  [6, 6, 4], 1)
-            self.create_piece('knight',  [7, 6, 7], 1)
-            self.create_piece('horse',   [6, 6, 0], 1)
-            self.create_piece('horse',   [7, 6, 1], 1)
-            self.create_piece('horse',   [7, 6, 6], 1)
-            self.create_piece('horse',   [6, 6, 7], 1)
-            self.create_piece('elephant',[6, 7, 0], 1)
-            self.create_piece('elephant',[6, 6, 1], 1)
-            self.create_piece('elephant',[6, 6, 6], 1)
-            self.create_piece('elephant',[6, 7, 7], 1)
-            self.create_piece('rook',    [7, 7, 0], 1)
-            self.create_piece('rook',    [6, 6, 2], 1)
-            self.create_piece('rook',    [6, 6, 5], 1)
-            self.create_piece('rook',    [7, 7, 7], 1)
-            self.create_piece('bishop',  [6, 7, 1], 1)
-            self.create_piece('bishop',  [7, 6, 2], 1)
-            self.create_piece('bishop',  [7, 6, 5], 1)
-            self.create_piece('bishop',  [6, 7, 6], 1)
-            self.create_piece('cardinal',[7, 7, 1], 1)
-            self.create_piece('cardinal',[6, 7, 2], 1)
-            self.create_piece('cardinal',[6, 7, 5], 1)
-            self.create_piece('cardinal',[7, 7, 6], 1)
-            self.create_piece('queen',   [7, 7, 2], 1)
-            self.create_piece('queen',   [7, 7, 5], 1)
-            self.create_piece('duchess', [6, 7, 3], 1)
-            self.create_piece('duchess', [6, 7, 4], 1)
-            self.create_piece('princess',[7, 6, 3], 1)
-            self.create_piece('princess',[7, 6, 4], 1)
-            self.create_piece('pope',    [7, 7, 3], 1)
+            self.create_piece('king',    (7, 7, 4), 1)
+            self.create_piece_row('pawn',    (self.size_of_dimensions[0]-2, self.size_of_dimensions[1]-3), 1)
+            self.create_piece_row('pawn',    (self.size_of_dimensions[0]-3, self.size_of_dimensions[1]-2), 1)
+            self.create_piece_row('peasant', (self.size_of_dimensions[0]-1, self.size_of_dimensions[1]-3), 1)
+            self.create_piece_row('peasant', (self.size_of_dimensions[0]-3, self.size_of_dimensions[1]-1), 1)
+            self.create_piece_row('soldier', (self.size_of_dimensions[0]-3, self.size_of_dimensions[1]-3), 1)
+            self.create_piece('knight',  (7, 6, 0), 1)
+            self.create_piece('knight',  (6, 6, 3), 1)
+            self.create_piece('knight',  (6, 6, 4), 1)
+            self.create_piece('knight',  (7, 6, 7), 1)
+            self.create_piece('horse',   (6, 6, 0), 1)
+            self.create_piece('horse',   (7, 6, 1), 1)
+            self.create_piece('horse',   (7, 6, 6), 1)
+            self.create_piece('horse',   (6, 6, 7), 1)
+            self.create_piece('elephant',(6, 7, 0), 1)
+            self.create_piece('elephant',(6, 6, 1), 1)
+            self.create_piece('elephant',(6, 6, 6), 1)
+            self.create_piece('elephant',(6, 7, 7), 1)
+            self.create_piece('rook',    (7, 7, 0), 1)
+            self.create_piece('rook',    (6, 6, 2), 1)
+            self.create_piece('rook',    (6, 6, 5), 1)
+            self.create_piece('rook',    (7, 7, 7), 1)
+            self.create_piece('bishop',  (6, 7, 1), 1)
+            self.create_piece('bishop',  (7, 6, 2), 1)
+            self.create_piece('bishop',  (7, 6, 5), 1)
+            self.create_piece('bishop',  (6, 7, 6), 1)
+            self.create_piece('cardinal',(7, 7, 1), 1)
+            self.create_piece('cardinal',(6, 7, 2), 1)
+            self.create_piece('cardinal',(6, 7, 5), 1)
+            self.create_piece('cardinal',(7, 7, 6), 1)
+            self.create_piece('queen',   (7, 7, 2), 1)
+            self.create_piece('queen',   (7, 7, 5), 1)
+            self.create_piece('duchess', (6, 7, 3), 1)
+            self.create_piece('duchess', (6, 7, 4), 1)
+            self.create_piece('princess',(7, 6, 3), 1)
+            self.create_piece('princess',(7, 6, 4), 1)
+            self.create_piece('pope',    (7, 7, 3), 1)
 
         for piece in self.pieces:
-            ## Go through the n-d array to find board
-            view = self.board.view()
-            for dimension in range(self.dimensions-1, 0, -1):
-                view = view[piece.position[dimension]].view()
-            view[piece.position[0]] = piece
+           self.board[piece.position] = piece 
 
         #
         return
@@ -165,36 +157,26 @@ class game():
 
     def create_piece_row(self, piece_type, position, colour):
         for i in range(0, self.size_of_dimensions[-1]): 
-            self.create_piece(piece_type, position+[i], colour)
+            self.create_piece(piece_type, position+(i,), colour)
 
     def create_piece(self, piece_type, position, colour):
-        full_position = [0,0,0]
-        for i in range(0, self.across_dimensions):
-            full_position[i] = position[i]
-
-        for i in range(0, self.side_dimensions):
-            full_position[-i-1] = position[-i-1]
-
-        piece = game_piece(piece_type, full_position, colour)
+        piece = game_piece(piece_type, position, colour)
         self.pieces.append(piece)
 
+    def move_piece(self, piece, new_position):
+        piece.position = new_position
+
+    def update_turn(self):
+        if self.turn == 0:
+            self.turn = 1
+            print('Black\'s turn\n')
+        elif self.turn == 1:
+            self.turn = 0
+            print('White\'s turn\n')
 
 
-    def create_board(self, pos, dimensions):
+    def create_board(self):
         return numpy.empty(self.size_of_dimensions, dtype=object)
-
-        if dimensions == 0:
-            return None
-        else:
-            board = []
-            for sub_board in range(0,self.size_of_dimensions[dimensions-1]):
-                sub_board_pos = pos.copy()
-                sub_board_pos[dimensions-1] = sub_board
-                board.append(self.create_board(pos, dimensions-1))
-
-            return board
-
-
 
     def open(self):
         read.print_controls()
@@ -294,3 +276,4 @@ class game_piece:
         self.colour = colour
         self.has_moved = False
         self.moved_last_turn = False
+        self.rendering = None

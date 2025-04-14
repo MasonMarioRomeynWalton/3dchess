@@ -10,7 +10,6 @@ from math import *
 from .lib import game
 from .lib import rendering_task
 from .lib import print_controls
-from .lib import main_menu
 
 ##
 
@@ -23,11 +22,15 @@ sys.excepthook = show_exception_and_exit
 
 ##
 
-#game = game(1,1,[8,8])
-game = game(1,2,[8,8,8])
+game = game(0,1,(8,))
+#game = game(1,1,(8,8))
+#game = game(1,2,(8,8,8))
 
-app = rendering_task(game)
-#command_line_task = command_line_task(app,game)
+render = rendering_task(game)
+
+from .lib import main_menu
+main_menu.render = render
+main_menu.game = game
 
 # Move to command line task
 while True:
@@ -44,14 +47,12 @@ while True:
     else:
         print('This is not a valid selection\n')
 
-print('test')
 
 ## Main task
-thread = threading.Thread(target = main_menu.open, args = (game,))
+thread = threading.Thread(target = main_menu.open, args = ())
 thread.start()
 
-print('test2')
 
 ## Panda3d task
 #Fix input
-app.run()
+render.run()

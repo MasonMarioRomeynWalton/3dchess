@@ -118,7 +118,7 @@ class menu:
         ## The function if the menu is a function
         self.function = function
 
-    def open(self, game):
+    def open(self):
         if self.pre_text != None:
             print(self.pre_text)
 
@@ -136,7 +136,8 @@ class menu:
 
         ## If the game is already over the input will mean something else
         ## The promt is printed elsewhere
-        if game.gameover == 2:
+        # Doesn't work I don't think
+        if main_menu.game.gameover == 2:
             while True:
                 if h == 'y':
                     app.reset()
@@ -144,13 +145,13 @@ class menu:
                     app.unrenders()
                     app.unrendersboard()
                     print_controls()
-                    game.restart()
+                    main_menu.game.restart()
                     app.rendersboard()
                     app.renders()
                     break
                 if h == 'n':
                     print('Thank you for playing!\n')
-                    game.gameover = 1
+                    main_menu.game.gameover = 1
                     break
                 else:
                     print('This is not a valid selection\n')
@@ -171,62 +172,67 @@ class menu:
                     print('You are already in the main menu')
                     print('You cannot go back from here!')
                     print('')
-                    self.open(game)
+                    self.open()
                 else:
                     return
             elif command in self.submenus.keys():
-                self.submenus[command].open(game)
+                self.submenus[command].open()
 
                 ## Open your own menu once they've returned
                 # May not be what we want
-                self.open(game)
+                self.open()
             elif self.main_menu == True:
-                check_move_input(command, game)
-                self.open(game)
+                check_move_input(command)
+                self.open()
             else:
                 print('This is not a valid selection\n')
-                self.open(game)
+                self.open()
 
-def check_move_input(command, game):
+def check_move_input(command):
     ## Check length
-    if len(command) != game.dimensions*2+1:
+    if len(command) != main_menu.game.dimensions*2+1:
         print('Wrong number of characters for move input\n')
         return
 
     ## Check old location
-    old_location = alpha_position_to_list(command[:game.dimensions])
+    old_location = alpha_position_to_list(command[:main_menu.game.dimensions])
     if old_location == None:
         return
 
     ## Check space
-    if command[game.dimensions] != ' ':
-        print(f'Character {str(game.dimensions+1)} is incorrect\n')
+    if command[main_menu.game.dimensions] != ' ':
+        print(f'Character {str(main_menu.game.dimensions+1)} is incorrect\n')
         return
 
     ## Check new location
-    new_location = alpha_position_to_list(command[game.dimensions+1:])
+    new_location = alpha_position_to_list(command[main_menu.game.dimensions+1:])
     if new_location == None:
         return
     
     ## If all is good, run move
-    move(game, old_location, new_location)
+    move(main_menu.game, main_menu.render, old_location, new_location)
 
 ## Changes the move input to a list of numbers
-def alpha_position_to_list(h):
-    # Make work for any length of dimensions
+def alpha_position_to_list(command_fragment):
+    dimensions = len(command_fragment)
+
     coordinates = [] 
-    for i in range(0, len(h)):
-        if ord(h[i]) in range(ord('0'), ord('8')+1):
-            coordinates.append(int(h[i]))
-        elif ord(h[i]) in range(ord('a'), ord('h')+1):
-            coordinates.append(ord(h[i])-ord('a')+1)
-        elif ord(h[i]) in range(ord('A'), ord('H')+1):
-            coordinates.append(ord(h[i])-ord('A')+1)
+    for i in range(0, dimensions):
+        if ord(command_fragment[i]) in range(ord('0'), ord('8')+1):
+            coordinates.append(int(command_fragment[i])-1)
+        elif ord(command_fragment[i]) in range(ord('a'), ord('h')+1):
+            coordinates.append(ord(command_fragment[i])-ord('a'))
+        elif ord(command_fragment[i]) in range(ord('A'), ord('H')+1):
+            coordinates.append(ord(command_fragment[i])-ord('A'))
         else:
             print(f'Character {str(i+1)} is incorrect\n')
             return None
 
-    return coordinates
+    if dimensions == 2:
+        coordinates = [coordinates[1], coordinates[0]]
+
+
+    return tuple(coordinates)
 
 help_menu = menu(
     'Hidden menu',

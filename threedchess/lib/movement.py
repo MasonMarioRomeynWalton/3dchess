@@ -1,7 +1,9 @@
+# Maybe make different movement types different classes
 class move:
-    def __init__(self, game, old_position, new_position, castling_movement = False):
+    def __init__(self, game, render, old_position, new_position, castling_movement = False):
 
         self.game = game
+        self.render = render
 
         ## The old position of the piece
         self.old_position = old_position
@@ -9,299 +11,298 @@ class move:
         ## The new position of the piece
         self.new_position = new_position
 
-        self.distance_between_positions = [
-            abs(self.old_position[i] - self.new_position[i]) for i in range(0,self.game.dimensions)
-        ]
+        self.distance_between_positions = tuple(
+            abs(self.old_position[i] - self.new_position[i])
+            for i in range(self.game.dimensions)
+        )
+
+        self.sorted_distance = sorted(self.distance_between_positions)
 
         # Not sure
         self.castling_movement = castling_movement
 
-        self.findpiece()
+        self.process_move()
 
 
-    ## Finds the piece returns whether the move is valid
-    def findpiece(self):
-
-        ## If two locations are the same
-        if all(self.old_position[i] == self.new_position[i] for i in range(0,self.game.dimensions)):
-            print('The two specified locations must be different\n')
-            self.valid = 0
-            return 0
-
-
-        self.piece = self.game.board
-        ## Go through the current board to find the piece
-        for dimension in range(self.game.dimensions-1, -1, -1):
-            self.piece = self.piece[self.old_position[dimension]]
-        if self.piece == None:
-            print('This is not a valid piece\n')
-            return 0
-        else:
-            return self.process()
-
-    def process(self):
+    def process_move(self):
+        ## Check if the game is over
         if self.game.gameover == 1 or self.game.gameover == 2:
             print('The game is already over!\n')
             return 0
+
+        ## If two locations are the same
+        if all(distance == 0 for distance in self.distance_between_positions):
+            print('The two specified locations must be different\n')
+            return 0
+
+        ## Find the piece being moved
+        self.piece = self.game.board[(self.old_position)]
+        if self.piece == None:
+            print('This is not a valid piece\n')
+            return 0
+
+        ## Check if the piece is a valid colour
         if not self.piece.colour == self.game.turn:
             print('This piece is not a valid colour\n')
             self.valid = 0
-            return
-        self.capture = 0
-        for piecetwo in range(0, len(game.pieces)):
-            if game.pieces[piecetwo].atr['pos'][0] == self.nx and game.pieces[piecetwo].atr['pos'][1] == self.ny and game.pieces[piecetwo].atr['pos'][2] == self.nz:
-                if self.piece.atr['col'] == game.pieces[piecetwo].atr['col']:
-                    print('You already have a piece here\n')
-                    self.valid = 0
-                    return
-                else:
-                    self.capture = 1
-                    break
-        if self.piece.atr['typ'] == 'king':
-            if self.dx <= 1 and self.dy <= 1 and self.dz <= 1:
-                pass
-            elif self.dx == 2 and self.dy == 0 and self.dz == 0:
-                self.rookpath()
-                if self.valid == 1:
-                    self.castlingvar = True
-                    self.castling()
-                    self.castlingvar = False
-            else:
-                print('This is not a valid location\n')
-                self.valid = 0
-        if self.piece.atr['typ'] == 'pawn':
-            if self.capture == 1:
-                if (self.ny - self.oy == game.turn or self.nz - self.oz == game.turn) and self.dl[0] == 0 and self.dl[1] == 0 and self.dl[2] == 1:
-                    print('Pawns can only capture on sideways diagonals\n')
-                    self.valid = 0
-                elif (self.ny - self.oy == game.turn or self.nz - self.oz == game.turn) and self.dx == 1 and self.dl[0] == 0 and self.dl[1] == 1 and self.dl[2] == 1:
-                    pass
-                elif (self.ny - self.oy == game.turn and self.nz - self.oz == game.turn) and self.dl[0] == 1 and self.dl[1] == 1 and self.dl[2] == 1:
-                    pass
-                else:
-                    print('This is not a valid location\n')
-                    self.valid = 0
-            if self.capture == 0:
-                if (self.ny - self.oy == game.turn or self.nz - self.oz == game.turn) and self.dl[0] == 0 and self.dl[1] == 0 and self.dl[2] == 1:
-                    pass
-                elif (self.ny - self.oy == game.turn*2 or self.nz - self.oz == game.turn*2) and self.dl[0] == 0 and self.dl[1] == 0 and self.dl[2] == 2:
-                    if self.piece.atr['first'] == 0:
-                        self.rookpath()
-                        self.enpass2 = [int((self.ox+self.nx)/2), int((self.oy+self.ny)/2), int((self.oz+self.nz)/2)]
-                    else:
-                        print('Pawns can only double step on their first turn\n')
-                        self.valid = 0
-                elif (self.ny - self.oy == game.turn or self.nz - self.oz == game.turn) and self.dx == 1 and self.dl[0] == 0 and self.dl[1] == 1 and self.dl[2] == 1:
-                    if game.enpass[0] == self.nx and game.enpass[1] == self.ny and game.enpass[2] == self.nz:
-                        for piecetwo in range(0, len(game.pieces)):
-                            if game.pieces[piecetwo].atr['moved_last_turn'] == True:
-                                self.capture = 1
-                                break
-                    else:
-                        print('Pawns can only move on sideways diagonals to capture\n')
-                        self.valid = 0
-                elif (self.ny - self.oy == game.turn and self.nz - self.oz == game.turn) and self.dl[0] == 1 and self.dl[1] == 1 and self.dl[2] == 1:
-                    if game.enpass[0] == self.nx and game.enpass[1] == self.ny and game.enpass[2] == self.nz:
-                        for piecetwo in range(0, len(game.pieces)):
-                            if game.pieces[piecetwo].atr['moved_last_turn'] == True:
-                                self.capture = 1
-                                break
-                    else:
-                        print('Pawns can only move on sideways diagonals to capture\n')
-                        self.valid = 0
-                else:
-                    print('This is not a valid location\n')
-                    self.valid = 0
-        if self.piece.atr['typ'] == 'peasant':
-            if self.capture == 1:
-                if (self.ny - self.oy == game.turn or self.nz - self.oz == game.turn) and self.dl[0] == 0 and self.dl[1] == 0 and self.dl[2] == 1:
-                    print('Peasants can only capture on three dimensional diagonals\n')
-                    self.valid = 0
-                elif (self.ny - self.oy == game.turn and self.nz - self.oz == game.turn) and self.dl[0] == 0 and self.dl[1] == 1 and self.dl[2] == 1:
-                    print('Peasants can only capture on three dimensional diagonals\n')
-                    self.valid = 0
-                elif (self.ny - self.oy == game.turn and self.nz - self.oz == game.turn) and self.dl[0] == 1 and self.dl[1] == 1 and self.dl[2] == 1:
-                    pass
-                else:
-                    print('This is not a valid location\n')
-                    self.valid = 0
-            if self.capture == 0:
-                if (self.ny - self.oy == game.turn or self.nz - self.oz == game.turn) and self.dl[0] == 0 and self.dl[1] == 0 and self.dl[2] == 1:
-                    pass
-                elif (self.ny - self.oy == game.turn and self.nz - self.oz == game.turn) and self.dl[0] == 0 and self.dl[1] == 1 and self.dl[2] == 1:
-                    pass
-                elif (self.ny - self.oy == game.turn*2 or self.nz - self.oz == game.turn*2) and self.dl[0] == 0 and self.dl[1] == 0 and self.dl[2] == 2:
-                    if self.piece.atr['first'] == 0:
-                        self.rookpath()
-                        self.enpass2 = [int((self.ox+self.nx)/2), int((self.oy+self.ny)/2), int((self.oz+self.nz)/2)]
-                    else:
-                        print('Peasants can only double step on their first turn\n')
-                        self.valid = 0
-                elif (self.ny - self.oy == game.turn*2 and self.nz - self.oz == game.turn*2) and self.dl[0] == 0 and self.dl[1] == 2 and self.dl[2] == 2:
-                    if self.piece.atr['first'] == 0:
-                        self.bishoppath()
-                        self.enpass2 = [int((self.ox+self.nx)/2), int((self.oy+self.ny)/2), int((self.oz+self.nz)/2)]
-                    else:
-                        print('Peasants can only double step on their first turn\n')
-                        self.valid = 0
-                elif (self.ny - self.oy == game.turn and self.nz - self.oz == game.turn) and self.dl[0] == 1 and self.dl[1] == 1 and self.dl[2] == 1:
-                    if game.enpass[0] == self.nx and game.enpass[1] == self.ny and game.enpass[2] == self.nz:
-                        for piecetwo in range(0, len(game.pieces)):
-                            if game.pieces[piecetwo].atr['moved_last_turn'] == True:
-                                self.capture = 1
-                                break
-                    else:
-                        print('Peasants can only move on three dimensional diagonals to capture\n')
-                        self.valid = 0
-                else:
-                    print('This is not a valid location\n')
-                    self.valid = 0
-        if self.piece.atr['typ'] == 'soldier':
-            if (self.dx <= 1 and self.dy <= 1 and self.dz <= 1):
-                pass
-            else:
-                print('This is not a valid location\n')
-                self.valid = 0
-        if self.piece.atr['typ'] == 'knight':
-            if self.dl[0] == 0 and self.dl[1] == 1 and self.dl[2] == 2:
-                pass
-            else:
-                print('This is not a valid location\n')
-                self.valid = 0
-        if self.piece.atr['typ'] == 'horse':
-            if self.dl[0] == 1 and self.dl[1] == 1 and self.dl[2] == 2:
-                pass
-            else:
-                print('This is not a valid location\n')
-                self.valid = 0
-        if self.piece.atr['typ'] == 'elephant':
-            if self.dl[0] == 1 and self.dl[1] == 2 and self.dl[2] == 2:
-                pass
-            else:
-                print('This is not a valid location\n')
-                self.valid = 0
-        if self.piece.atr['typ'] == 'rook':
-            if self.dl[0] == 0 and self.dl[1] == 0:
-                self.rookpath()
-            else:
-                print('This is not a valid location\n')
-                self.valid = 0
-        if self.piece.atr['typ'] == 'bishop':
-            if (self.dx == self.dy and self.dz == 0) or (self.dx == self.dz and self.dy == 0) or (self.dy == self.dz and self.dx == 0):
-                self.bishoppath()
-            else:
-                print('This is not a valid location\n')
-                self.valid = 0
-        if self.piece.atr['typ'] == 'cardinal':
-            if (self.dx == self.dy and self.dx == self.dz):
-                self.cardinalpath()
-            else:
-                print('This is not a valid location\n')
-                self.valid = 0
-        if self.piece.atr['typ'] == 'queen':
-            if self.dl[0] == 0 and self.dl[1] == 0:
-                self.rookpath()
-            elif (self.dx == self.dy and self.dz == 0) or (self.dx == self.dz and self.dy == 0) or (self.dy == self.dz and self.dx == 0):
-                self.bishoppath()
-            else:
-                print('This is not a valid location\n')
-                self.valid = 0
-        if self.piece.atr['typ'] == 'duchess':
-            if self.dl[0] == 0 and self.dl[1] == 0:
-                self.rookpath()
-            elif (self.dx == self.dy and self.dx == self.dz):
-                self.cardinalpath()
-            else:
-                print('This is not a valid location\n')
-                self.valid = 0
-        if self.piece.atr['typ'] == 'princess':
-            if (self.dx == self.dy and self.dz == 0) or (self.dx == self.dz and self.dy == 0) or (self.dy == self.dz and self.dx == 0):
-                self.bishoppath()
-            elif (self.dx == self.dy and self.dx == self.dz):
-                self.cardinalpath()
-            else:
-                print('This is not a valid location\n')
-                self.valid = 0
-        if self.piece.atr['typ'] == 'pope':
-            if self.dl[0] == 0 and self.dl[1] == 0:
-                self.rookpath()
-            elif (self.dx == self.dy and self.dz == 0) or (self.dx == self.dz and self.dy == 0) or (self.dy == self.dz and self.dx == 0):
-                self.bishoppath()
-            elif (self.dx == self.dy and self.dx == self.dz):
-                self.cardinalpath()
-            else:
-                print('This is not a valid location\n')
-                self.valid = 0
+            return 0
 
-        if self.valid == 1:
-            if self.capture == 1:
-                move2 = movement()
-                move2.piece = game.pieces[piecetwo]
-                move2.term = piecetwo
-                if move2.piece.atr['col'] == 1:
-                    game.capturedposg = game.capturedposw
-                if move2.piece.atr['col'] == -1:
-                    game.capturedposg = game.capturedposb
-                move2.nx = game.capturedposg%8 + 1
-                if move2.piece.atr['col'] == 1:
-                    move2.ny = -((game.capturedposg//8)%4)+8
-                if move2.piece.atr['col'] == -1:
-                    move2.ny = ((game.capturedposg//8)%4)+1
-                move2.nz = -(game.capturedposg//32)-1
-                if move2.piece.atr['col'] == 1:
-                    game.capturedposw = game.capturedposw + 1
-                    game.write(f'{home}/public/misc.txt',None,str(game.capturedposw),1)
-                    capturer = ('black')
-                    captured = ('white')
-                if move2.piece.atr['col'] == -1:
-                    game.capturedposb = game.capturedposb + 1
-                    game.write(f'{home}/public/misc.txt',None,str(game.capturedposb),2)
-                    capturer = ('white')
-                    captured = ('black')
-                print(f'A {captured} {game.pieces[piecetwo].atr["typ"]} has been captured!\n')
-                move2.update()
-                game.write(f'{home}/public/pieces.txt',None,f'[{move2.piece.atr["typ"]},({move2.piece.atr["pos"][0]},{move2.piece.atr["pos"][1]},{move2.piece.atr["pos"][2]}),{move2.piece.atr["col"]},{move2.piece.atr["first"]},{move2.piece.atr["moved_last_turn"]}]',move2.term)
+        ## Find if there's a piece in the new location
+        self.piece_for_capture = self.game.board[(self.new_position)]
 
-                if game.pieces[piecetwo].atr['typ'] == 'king':
-                    print(f'Game over, {capturer} wins!!')
-                    game.gameover = 2
-                    game.write(f'{home}/public/misc.txt',None,str(game.gameover),5)
-                    print('Do you want to play again? (y/n)')
+        ## Check if you already have a piece in the new location
+        if (self.piece_for_capture != None):
+            if self.piece.colour == self.piece_for_capture.colour:
+                print('You already have a piece here\n')
+                return 0
+            else:
+                self.capture = True
+        else:
+            self.capture = False
 
-            if self.piece.atr['typ'] == 'pawn' or self.piece.atr['typ'] == 'peasant':
-                if self.ny == 4+game.turn*4 and self.nz == 4+game.turn*4:
-                    self.pro()
-            self.update()
 
-            if move.castlingvar == False:
-                if game.turn == 1:
-                    game.turn = -1
-                    print('Black\'s turn\n')
-                elif game.turn == -1:
-                    game.turn = 1
-                    print('White\'s turn\n')
-                for u in range(0,len(game.pieces)):
-                    if game.pieces[u].atr['moved_last_turn'] == True:
-                        game.pieces[u].atr['moved_last_turn'] = False
-                        game.write(f'{home}/public/pieces.txt',None,f'[{game.pieces[u].atr["typ"]},({game.pieces[u].atr["pos"][0]},{game.pieces[u].atr["pos"][1]},{game.pieces[u].atr["pos"][2]}),{game.pieces[u].atr["col"]},{game.pieces[u].atr["first"]},{game.pieces[u].atr["moved_last_turn"]}]',u)
-                        app.rendersi(game.pieces[u].atr,'piece')
-                move.piece.atr['moved_last_turn'] = True
-                game.write(f'{home}/public/pieces.txt',None,f'[{self.piece.atr["typ"]},({self.piece.atr["pos"][0]},{self.piece.atr["pos"][1]},{self.piece.atr["pos"][2]}),{self.piece.atr["col"]},{self.piece.atr["first"]},{self.piece.atr["moved_last_turn"]}]',self.term)
-                try:
-                    move.move3.piece.atr['moved_last_turn'] = True
-                    game.write(f'{home}/public/pieces.txt',None,f'[{move.move3.piece.atr["typ"]},({move.move3.piece.atr["pos"][0]},{move.move3.piece.atr["pos"][1]},{move.move3.piece.atr["pos"][2]}),{move.move3.piece.atr["col"]},{move.move3.piece.atr["first"]},{move.move3.piece.atr["moved_last_turn"]}]',move.move3.term)
-                    app.rendersi(move.move3.piece.atr,'piece')
-                except:
-                    pass
-                app.rendersi(self.piece.atr,'piece')
-                game.write(f'{home}/public/misc.txt',None,str(game.turn),0)
-                game.moved_from_last_turn = [self.ox,self.oy,self.oz]
-                game.write(f'{home}/public/misc.txt','moved_from_last_turn: ',f'({game.moved_from_last_turn[0]},{game.moved_from_last_turn[1]},{game.moved_from_last_turn[2]})',3)
-                game.enpass = self.enpass2
-                game.write(f'{home}/public/misc.txt','enpass: ',f'({game.enpass[0]},{game.enpass[1]},{game.enpass[2]})',4)
-                move.move3 = None
+#        if self.piece.atr['typ'] == 'king':
+#            if self.dx == 2 and self.dy == 0 and self.dz == 0:
+#                if(self.rookpath())
+#                    self.castlingvar = True
+#                    self.castling()
+#                    self.castlingvar = False
+#            elif (self.dx > 1 or self.dy > 1 and self.dz > 1):
+#                print('This is not a valid location\n')
+#                return 0
+#
+#        if self.piece.atr['typ'] == 'pawn':
+#            if self.capture == 1:
+#                if (self.ny - self.oy == game.turn or self.nz - self.oz == game.turn) and self.dl[0] == 0 and self.dl[1] == 0 and self.dl[2] == 1:
+#                    print('Pawns can only capture on sideways diagonals\n')
+#                    self.valid = 0
+#                elif (self.ny - self.oy == game.turn or self.nz - self.oz == game.turn) and self.dx == 1 and self.dl[0] == 0 and self.dl[1] == 1 and self.dl[2] == 1:
+#                    pass
+#                elif (self.ny - self.oy == game.turn and self.nz - self.oz == game.turn) and self.dl[0] == 1 and self.dl[1] == 1 and self.dl[2] == 1:
+#                    pass
+#                else:
+#                    print('This is not a valid location\n')
+#                    self.valid = 0
+#            if self.capture == 0:
+#                if (self.ny - self.oy == game.turn or self.nz - self.oz == game.turn) and self.dl[0] == 0 and self.dl[1] == 0 and self.dl[2] == 1:
+#                    pass
+#                elif (self.ny - self.oy == game.turn*2 or self.nz - self.oz == game.turn*2) and self.dl[0] == 0 and self.dl[1] == 0 and self.dl[2] == 2:
+#                    if self.piece.atr['first'] == 0:
+#                        self.rookpath()
+#                        self.enpass2 = [int((self.ox+self.nx)/2), int((self.oy+self.ny)/2), int((self.oz+self.nz)/2)]
+#                    else:
+#                        print('Pawns can only double step on their first turn\n')
+#                        self.valid = 0
+#                elif (self.ny - self.oy == game.turn or self.nz - self.oz == game.turn) and self.dx == 1 and self.dl[0] == 0 and self.dl[1] == 1 and self.dl[2] == 1:
+#                    if game.enpass[0] == self.nx and game.enpass[1] == self.ny and game.enpass[2] == self.nz:
+#                        for piecetwo in range(len(game.pieces)):
+#                            if game.pieces[piecetwo].atr['moved_last_turn'] == True:
+#                                self.capture = 1
+#                                break
+#                    else:
+#                        print('Pawns can only move on sideways diagonals to capture\n')
+#                        self.valid = 0
+#                elif (self.ny - self.oy == game.turn and self.nz - self.oz == game.turn) and self.dl[0] == 1 and self.dl[1] == 1 and self.dl[2] == 1:
+#                    if game.enpass[0] == self.nx and game.enpass[1] == self.ny and game.enpass[2] == self.nz:
+#                        for piecetwo in range(len(game.pieces)):
+#                            if game.pieces[piecetwo].atr['moved_last_turn'] == True:
+#                                self.capture = 1
+#                                break
+#                    else:
+#                        print('Pawns can only move on sideways diagonals to capture\n')
+#                        self.valid = 0
+#                else:
+#                    print('This is not a valid location\n')
+#                    self.valid = 0
+#        if self.piece.atr['typ'] == 'peasant':
+#            if self.capture == 1:
+#                if (self.ny - self.oy == game.turn or self.nz - self.oz == game.turn) and self.dl[0] == 0 and self.dl[1] == 0 and self.dl[2] == 1:
+#                    print('Peasants can only capture on three dimensional diagonals\n')
+#                    self.valid = 0
+#                elif (self.ny - self.oy == game.turn and self.nz - self.oz == game.turn) and self.dl[0] == 0 and self.dl[1] == 1 and self.dl[2] == 1:
+#                    print('Peasants can only capture on three dimensional diagonals\n')
+#                    self.valid = 0
+#                elif (self.ny - self.oy == game.turn and self.nz - self.oz == game.turn) and self.dl[0] == 1 and self.dl[1] == 1 and self.dl[2] == 1:
+#                    pass
+#                else:
+#                    print('This is not a valid location\n')
+#                    self.valid = 0
+#            if self.capture == 0:
+#                if (self.ny - self.oy == game.turn or self.nz - self.oz == game.turn) and self.dl[0] == 0 and self.dl[1] == 0 and self.dl[2] == 1:
+#                    pass
+#                elif (self.ny - self.oy == game.turn and self.nz - self.oz == game.turn) and self.dl[0] == 0 and self.dl[1] == 1 and self.dl[2] == 1:
+#                    pass
+#                elif (self.ny - self.oy == game.turn*2 or self.nz - self.oz == game.turn*2) and self.dl[0] == 0 and self.dl[1] == 0 and self.dl[2] == 2:
+#                    if self.piece.atr['first'] == 0:
+#                        self.rookpath()
+#                        self.enpass2 = [int((self.ox+self.nx)/2), int((self.oy+self.ny)/2), int((self.oz+self.nz)/2)]
+#                    else:
+#                        print('Peasants can only double step on their first turn\n')
+#                        self.valid = 0
+#                elif (self.ny - self.oy == game.turn*2 and self.nz - self.oz == game.turn*2) and self.dl[0] == 0 and self.dl[1] == 2 and self.dl[2] == 2:
+#                    if self.piece.atr['first'] == 0:
+#                        self.bishoppath()
+#                        self.enpass2 = [int((self.ox+self.nx)/2), int((self.oy+self.ny)/2), int((self.oz+self.nz)/2)]
+#                    else:
+#                        print('Peasants can only double step on their first turn\n')
+#                        self.valid = 0
+#                elif (self.ny - self.oy == game.turn and self.nz - self.oz == game.turn) and self.dl[0] == 1 and self.dl[1] == 1 and self.dl[2] == 1:
+#                    if game.enpass[0] == self.nx and game.enpass[1] == self.ny and game.enpass[2] == self.nz:
+#                        for piecetwo in range(len(game.pieces)):
+#                            if game.pieces[piecetwo].atr['moved_last_turn'] == True:
+#                                self.capture = 1
+#                                break
+#                    else:
+#                        print('Peasants can only move on three dimensional diagonals to capture\n')
+#                        self.valid = 0
+#                else:
+#                    print('This is not a valid location\n')
+#                    self.valid = 0
+#
+#        if self.piece.atr['typ'] == 'soldier':
+#            if (self.dx > 1 or self.dy > 1 or self.dz > 1):
+#                print('This is not a valid location\n')
+#                return 0
+#
+#        if self.piece.atr['typ'] == 'knight':
+#            if (self.dl[0] != 0 or self.dl[1] != 1 or self.dl[2]) != 2:
+#                pass
+#            else:
+#                print('This is not a valid location\n')
+#                self.valid = 0
+#
+#        if self.piece.atr['typ'] == 'horse':
+#            if self.dl[0] == 1 and self.dl[1] == 1 and self.dl[2] == 2:
+#                pass
+#            else:
+#                print('This is not a valid location\n')
+#                self.valid = 0
+#        if self.piece.atr['typ'] == 'elephant':
+#            if self.dl[0] == 1 and self.dl[1] == 2 and self.dl[2] == 2:
+#                pass
+#            else:
+#                print('This is not a valid location\n')
+#                self.valid = 0
+#        if self.piece.atr['typ'] == 'rook':
+#            if self.dl[0] == 0 and self.dl[1] == 0:
+#                self.rookpath()
+#            else:
+#                print('This is not a valid location\n')
+#                self.valid = 0
+#        if self.piece.atr['typ'] == 'bishop':
+#            if (self.dx == self.dy and self.dz == 0) or (self.dx == self.dz and self.dy == 0) or (self.dy == self.dz and self.dx == 0):
+#                self.bishoppath()
+#            else:
+#                print('This is not a valid location\n')
+#                self.valid = 0
+#        if self.piece.atr['typ'] == 'cardinal':
+#            if (self.dx == self.dy and self.dx == self.dz):
+#                self.cardinalpath()
+#            else:
+#                print('This is not a valid location\n')
+#                self.valid = 0
+#        if self.piece.atr['typ'] == 'queen':
+#            if self.dl[0] == 0 and self.dl[1] == 0:
+#                self.rookpath()
+#            elif (self.dx == self.dy and self.dz == 0) or (self.dx == self.dz and self.dy == 0) or (self.dy == self.dz and self.dx == 0):
+#                self.bishoppath()
+#            else:
+#                print('This is not a valid location\n')
+#                self.valid = 0
+#        if self.piece.atr['typ'] == 'duchess':
+#            if self.dl[0] == 0 and self.dl[1] == 0:
+#                self.rookpath()
+#            elif (self.dx == self.dy and self.dx == self.dz):
+#                self.cardinalpath()
+#            else:
+#                print('This is not a valid location\n')
+#                self.valid = 0
+#        if self.piece.atr['typ'] == 'princess':
+#            if (self.dx == self.dy and self.dz == 0) or (self.dx == self.dz and self.dy == 0) or (self.dy == self.dz and self.dx == 0):
+#                self.bishoppath()
+#            elif (self.dx == self.dy and self.dx == self.dz):
+#                self.cardinalpath()
+#            else:
+#                print('This is not a valid location\n')
+#                self.valid = 0
+#        if self.piece.atr['typ'] == 'pope':
+#            if self.dl[0] == 0 and self.dl[1] == 0:
+#                self.rookpath()
+#            elif (self.dx == self.dy and self.dz == 0) or (self.dx == self.dz and self.dy == 0) or (self.dy == self.dz and self.dx == 0):
+#                self.bishoppath()
+#            elif (self.dx == self.dy and self.dx == self.dz):
+#                self.cardinalpath()
+#            else:
+#                print('This is not a valid location\n')
+#                self.valid = 0
+
+        if self.capture == 1:
+            move2 = movement()
+            move2.piece = game.pieces[piecetwo]
+            move2.term = piecetwo
+            if move2.piece.atr['col'] == 1:
+                game.capturedposg = game.capturedposw
+            if move2.piece.atr['col'] == -1:
+                game.capturedposg = game.capturedposb
+            move2.nx = game.capturedposg%8 + 1
+            if move2.piece.atr['col'] == 1:
+                move2.ny = -((game.capturedposg//8)%4)+8
+            if move2.piece.atr['col'] == -1:
+                move2.ny = ((game.capturedposg//8)%4)+1
+            move2.nz = -(game.capturedposg//32)-1
+            if move2.piece.atr['col'] == 1:
+                game.capturedposw = game.capturedposw + 1
+                game.write(f'{home}/public/misc.txt',None,str(game.capturedposw),1)
+                capturer = ('black')
+                captured = ('white')
+            if move2.piece.atr['col'] == -1:
+                game.capturedposb = game.capturedposb + 1
+                game.write(f'{home}/public/misc.txt',None,str(game.capturedposb),2)
+                capturer = ('white')
+                captured = ('black')
+            print(f'A {captured} {game.pieces[piecetwo].atr["typ"]} has been captured!\n')
+            move2.update()
+            game.write(f'{home}/public/pieces.txt',None,f'[{move2.piece.atr["typ"]},({move2.piece.atr["pos"][0]},{move2.piece.atr["pos"][1]},{move2.piece.atr["pos"][2]}),{move2.piece.atr["col"]},{move2.piece.atr["first"]},{move2.piece.atr["moved_last_turn"]}]',move2.term)
+
+            if game.pieces[piecetwo].atr['typ'] == 'king':
+                print(f'Game over, {capturer} wins!!')
+                game.gameover = 2
+                game.write(f'{home}/public/misc.txt',None,str(game.gameover),5)
+                print('Do you want to play again? (y/n)')
+
+#        if self.piece.atr['typ'] == 'pawn' or self.piece.atr['typ'] == 'peasant':
+#            if self.ny == 4+game.turn*4 and self.nz == 4+game.turn*4:
+#                self.pro()
+
+        self.update()
+
+        #if move.castlingvar == False:
+        self.game.update_turn()
+
+#            for u in range(len(game.pieces)):
+#                if game.pieces[u].atr['moved_last_turn'] == True:
+#                    game.pieces[u].atr['moved_last_turn'] = False
+#                    game.write(f'{home}/public/pieces.txt',None,f'[{game.pieces[u].atr["typ"]},({game.pieces[u].atr["pos"][0]},{game.pieces[u].atr["pos"][1]},{game.pieces[u].atr["pos"][2]}),{game.pieces[u].atr["col"]},{game.pieces[u].atr["first"]},{game.pieces[u].atr["moved_last_turn"]}]',u)
+#                    app.rendersi(game.pieces[u].atr,'piece')
+#            move.piece.atr['moved_last_turn'] = True
+#            game.write(f'{home}/public/pieces.txt',None,f'[{self.piece.atr["typ"]},({self.piece.atr["pos"][0]},{self.piece.atr["pos"][1]},{self.piece.atr["pos"][2]}),{self.piece.atr["col"]},{self.piece.atr["first"]},{self.piece.atr["moved_last_turn"]}]',self.term)
+#            try:
+#                move.move3.piece.atr['moved_last_turn'] = True
+#                game.write(f'{home}/public/pieces.txt',None,f'[{move.move3.piece.atr["typ"]},({move.move3.piece.atr["pos"][0]},{move.move3.piece.atr["pos"][1]},{move.move3.piece.atr["pos"][2]}),{move.move3.piece.atr["col"]},{move.move3.piece.atr["first"]},{move.move3.piece.atr["moved_last_turn"]}]',move.move3.term)
+#                app.rendersi(move.move3.piece.atr,'piece')
+#            except:
+#                pass
+
+#            app.rendersi(self.piece,'piece')
+#            game.write(f'{home}/public/misc.txt',None,str(game.turn),0)
+#            game.moved_from_last_turn = [self.ox,self.oy,self.oz]
+#            game.write(f'{home}/public/misc.txt','moved_from_last_turn: ',f'({game.moved_from_last_turn[0]},{game.moved_from_last_turn[1]},{game.moved_from_last_turn[2]})',3)
+#            game.enpass = self.enpass2
+#            game.write(f'{home}/public/misc.txt','enpass: ',f'({game.enpass[0]},{game.enpass[1]},{game.enpass[2]})',4)
+#            move.move3 = None
 
     def castling(self):
+        ## Queen side vs King side castling
         if self.nx-self.ox == 2:
             castle = app.board[self.oy-1][self.oz-1][self.ox+2]
         if self.nx-self.ox == -2:
@@ -336,6 +337,9 @@ class move:
                 self.piece.atr['typ'] = prop
             else:
                 print('This is not a valid piece\n')
+
+    # Make decorator for this
+
 
     def rookpath(self):
         if self.dx != 0:
@@ -414,16 +418,20 @@ class move:
                 return
 
     def update(self):
-        self.piece.atr['pos'][0] = self.nx
-        self.piece.atr['pos'][1] = self.ny
-        self.piece.atr['pos'][2] = self.nz
-        del self.piece.atr['rel'].atr['rel']
-        del self.piece.atr['rel']
-        app.reunrenders(self.piece)
-        app.rerenders(self.piece)
-        if move.castlingvar == False:
-            if not None in game.moved_from_last_turn:
-                app.board[game.moved_from_last_turn[1]-1][game.moved_from_last_turn[2]-1][game.moved_from_last_turn[0]-1].atr['obj'].setTexture(app.board[game.moved_from_last_turn[1]-1][game.moved_from_last_turn[2]-1][game.moved_from_last_turn[0]-1].atr['col'])
-            app.board[self.oy-1][self.oz-1][self.ox-1].atr['obj'].setTexture(app.colour[3][2][1])
-        self.piece.atr['first'] = 1
+
+
+        self.piece_render = self.render.board[(
+            self.render.change_pos_for_3d(self.old_position)
+        )].rel
+        self.render.unrender_piece(self.piece_render)
+
+        self.game.move_piece(self.piece, self.new_position)
+        self.render.render_piece(self.piece)
+
+        # Got to find some way to attached it back to the old board
+        #if move.castlingvar == False:
+        #    if not None in game.moved_from_last_turn:
+        #        app.board[game.moved_from_last_turn[1]-1][game.moved_from_last_turn[2]-1][game.moved_from_last_turn[0]-1].atr['obj'].setTexture(app.board[game.moved_from_last_turn[1]-1][game.moved_from_last_turn[2]-1][game.moved_from_last_turn[0]-1].atr['col'])
+        #    app.board[self.oy-1][self.oz-1][self.ox-1].atr['obj'].setTexture(app.colour[3][2][1])
+        #self.piece.atr['first'] = 1
 
