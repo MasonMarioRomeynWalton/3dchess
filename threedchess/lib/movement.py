@@ -21,31 +21,33 @@ class move:
         # Not sure
         self.castling_movement = castling_movement
 
-        self.process_move()
+        self.is_valid = self.process_move()
 
 
+    ## Process a move attempt
+    ## Returns whether or not the move was valid
     def process_move(self):
         ## Check if the game is over
         if self.game.gameover == 1 or self.game.gameover == 2:
             print('The game is already over!\n')
-            return 0
+            return False
 
         ## If two locations are the same
         if all(distance == 0 for distance in self.distance_between_positions):
             print('The two specified locations must be different\n')
-            return 0
+            return False
 
         ## Find the piece being moved
         self.piece = self.game.board[(self.old_position)]
         if self.piece == None:
             print('This is not a valid piece\n')
-            return 0
+            return False
 
         ## Check if the piece is a valid colour
         if not self.piece.colour == self.game.turn:
             print('This piece is not a valid colour\n')
             self.valid = 0
-            return 0
+            return False
 
         ## Find if there's a piece in the new location
         self.piece_for_capture = self.game.board[(self.new_position)]
@@ -54,7 +56,7 @@ class move:
         if (self.piece_for_capture != None):
             if self.piece.colour == self.piece_for_capture.colour:
                 print('You already have a piece here\n')
-                return 0
+                return False
             else:
                 self.capture = True
         else:
@@ -278,6 +280,8 @@ class move:
 
         #if move.castlingvar == False:
         self.game.update_turn()
+
+        return True
 
 #            for u in range(len(game.pieces)):
 #                if game.pieces[u].atr['moved_last_turn'] == True:

@@ -552,7 +552,8 @@ class rendering_task():
         else:
             old_position = self.change_pos_back(self.picked_for_move.position)
             new_position = self.change_pos_back(self.picked_for_capture_board.position)
-            if (move(self.game, self, old_position, new_position)):
+            my_move = move(self.game, self, old_position, new_position)
+            if my_move.is_valid == True:
                 if self.picked_for_move != None:
                     self.picked_for_move.is_picked_for_move = False
                     self.highlight_piece(self.picked_for_move,'piece')
