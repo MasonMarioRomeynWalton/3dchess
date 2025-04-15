@@ -137,6 +137,7 @@ class menu:
         ## If the game is already over the input will mean something else
         ## The promt is printed elsewhere
         # Doesn't work I don't think
+        # Move todo
         if main_menu.game.gameover == 2:
             while True:
                 if h == 'y':
@@ -210,7 +211,7 @@ def check_move_input(command):
         return
     
     ## If all is good, run move
-    move(main_menu.game, main_menu.render, old_location, new_location)
+    move(main_menu.game, old_location, new_location)
 
 ## Changes the move input to a list of numbers
 def alpha_position_to_list(command_fragment):

@@ -238,49 +238,48 @@ class move:
 #                print('This is not a valid location\n')
 #                self.valid = 0
 
-        if self.capture == 1:
-            move2 = movement()
-            move2.piece = game.pieces[piecetwo]
-            move2.term = piecetwo
-            if move2.piece.atr['col'] == 1:
-                game.capturedposg = game.capturedposw
-            if move2.piece.atr['col'] == -1:
-                game.capturedposg = game.capturedposb
-            move2.nx = game.capturedposg%8 + 1
-            if move2.piece.atr['col'] == 1:
-                move2.ny = -((game.capturedposg//8)%4)+8
-            if move2.piece.atr['col'] == -1:
-                move2.ny = ((game.capturedposg//8)%4)+1
-            move2.nz = -(game.capturedposg//32)-1
-            if move2.piece.atr['col'] == 1:
-                game.capturedposw = game.capturedposw + 1
-                game.write(f'{home}/public/misc.txt',None,str(game.capturedposw),1)
-                capturer = ('black')
-                captured = ('white')
-            if move2.piece.atr['col'] == -1:
-                game.capturedposb = game.capturedposb + 1
-                game.write(f'{home}/public/misc.txt',None,str(game.capturedposb),2)
-                capturer = ('white')
-                captured = ('black')
-            print(f'A {captured} {game.pieces[piecetwo].atr["typ"]} has been captured!\n')
-            move2.update()
-            game.write(f'{home}/public/pieces.txt',None,f'[{move2.piece.atr["typ"]},({move2.piece.atr["pos"][0]},{move2.piece.atr["pos"][1]},{move2.piece.atr["pos"][2]}),{move2.piece.atr["col"]},{move2.piece.atr["first"]},{move2.piece.atr["moved_last_turn"]}]',move2.term)
+        if self.capture == True:
+            if self.piece.colour == 0:
+                capture_position = self.game.next_captured_pos_black
+            if self.piece.colour == 1:
+                capture_position = self.game.next_captured_pos_white
 
-            if game.pieces[piecetwo].atr['typ'] == 'king':
-                print(f'Game over, {capturer} wins!!')
-                game.gameover = 2
-                game.write(f'{home}/public/misc.txt',None,str(game.gameover),5)
-                print('Do you want to play again? (y/n)')
+            self.game.move_piece(self.new_position, capture_position, False)
+
+            # Something about making sure the captured pieces don't overlap
+#            if move2.piece.atr['col'] == 1:
+#                game.capturedposg = game.capturedposw
+#            if move2.piece.atr['col'] == -1:
+#                game.capturedposg = game.capturedposb
+#            move2.nx = game.capturedposg%8 + 1
+#            if move2.piece.atr['col'] == 1:
+#                move2.ny = -((game.capturedposg//8)%4)+8
+#            if move2.piece.atr['col'] == -1:
+#                move2.ny = ((game.capturedposg//8)%4)+1
+#            move2.nz = -(game.capturedposg//32)-1
+#            if move2.piece.atr['col'] == 1:
+#                game.capturedposw = game.capturedposw + 1
+#                game.write(f'{home}/public/misc.txt',None,str(game.capturedposw),1)
+#                capturer = ('black')
+#                captured = ('white')
+#            if move2.piece.atr['col'] == -1:
+#                game.capturedposb = game.capturedposb + 1
+#                game.write(f'{home}/public/misc.txt',None,str(game.capturedposb),2)
+#                capturer = ('white')
+#                captured = ('black')
+#            game.write(f'{home}/public/pieces.txt',None,f'[{move2.piece.atr["typ"]},({move2.piece.atr["pos"][0]},{move2.piece.atr["pos"][1]},{move2.piece.atr["pos"][2]}),{move2.piece.atr["col"]},{move2.piece.atr["first"]},{move2.piece.atr["moved_last_turn"]}]',move2.term)
+
+            #if game.pieces[piecetwo].atr['typ'] == 'king':
+                #print(f'Game over, {capturer} wins!!')
+                #game.gameover = 2
+                #game.write(f'{home}/public/misc.txt',None,str(game.gameover),5)
+                #print('Do you want to play again? (y/n)')
 
 #        if self.piece.atr['typ'] == 'pawn' or self.piece.atr['typ'] == 'peasant':
 #            if self.ny == 4+game.turn*4 and self.nz == 4+game.turn*4:
 #                self.pro()
 
-        self.update()
-
         #if move.castlingvar == False:
-        self.game.update_turn()
-
         return True
 
 #            for u in range(len(game.pieces)):
@@ -420,22 +419,4 @@ class move:
                 print(f'You can not move {self.piece.atr["typ"]}s through other pieces\n')
                 self.valid = 0
                 return
-
-    def update(self):
-        self.render.unhighlight_last_moved_piece()
-        self.render.unhighlight_last_moved_board()
-
-        self.render.unrender_piece(self.piece)
-        self.game.move_piece(self.piece, self.old_position, self.new_position)
-        self.render.render_piece(self.piece)
-
-        self.render.highlight_last_moved_board(self.old_position)
-        self.render.highlight_last_moved_piece(self.new_position)
-
-        # Got to find some way to attached it back to the old board
-        #if move.castlingvar == False:
-        #    if not None in game.moved_from_last_turn:
-        #        app.board[game.moved_from_last_turn[1]-1][game.moved_from_last_turn[2]-1][game.moved_from_last_turn[0]-1].atr['obj'].setTexture(app.board[game.moved_from_last_turn[1]-1][game.moved_from_last_turn[2]-1][game.moved_from_last_turn[0]-1].atr['col'])
-        #    app.board[self.oy-1][self.oz-1][self.ox-1].atr['obj'].setTexture(app.colour[3][2][1])
-        #self.piece.atr['first'] = 1
 

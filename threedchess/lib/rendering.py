@@ -7,7 +7,6 @@ import itertools
 import numpy
 
 from . import controlable_camera
-from . import move
 
 home = "../../3dchess"
 
@@ -364,7 +363,12 @@ class rendering_task():
 
         current_piece_render.obj.setPythonTag('object_attributes', current_piece_render)
 
-        self.board[self.change_pos_for_3d(piece.position)].rel = current_piece_render
+
+        if all([(piece.position[i] < self.game.size_of_dimensions[i] and
+                 piece.position[i] >= 0
+                )
+                for i in range(self.game.dimensions)]):
+            self.board[self.change_pos_for_3d(piece.position)].rel = current_piece_render
 
         return current_piece_render
 
@@ -379,6 +383,10 @@ class rendering_task():
             self.picked_for_capture = None
 
         self.unrender_generic_object(board_render.rel)
+
+        if board_render.rel == self.last_moved_piece:
+            self.last_moved_piece = None
+
         board_render.rel = None
 
 
@@ -487,7 +495,6 @@ class rendering_task():
 
 
     def select_move_piece(self):
-        #Change to move(x,y,z)
 
         ## Unhighlight the previous piece
         if self.picked_for_move != None:
@@ -552,8 +559,7 @@ class rendering_task():
         else:
             old_position = self.change_pos_back(self.picked_for_move.position)
             new_position = self.change_pos_back(self.picked_for_capture_board.position)
-            my_move = move(self.game, self, old_position, new_position)
-            if my_move.is_valid == True:
+            if self.game.attempt_move(self, old_position, new_position):
                 if self.picked_for_move != None:
                     self.picked_for_move.is_picked_for_move = False
                     self.highlight_piece(self.picked_for_move,'piece')

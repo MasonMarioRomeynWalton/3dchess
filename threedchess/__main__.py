@@ -27,12 +27,6 @@ game = game(1,1,(8,8))
 #game = game(2,0,(8,8))
 #game = game(2,1,(8,8,8))
 
-render = rendering_task(game)
-
-from .lib import main_menu
-main_menu.render = render
-main_menu.game = game
-
 # Move to command line task
 while True:
     print('Load from a saved file? (y/n)')
@@ -48,6 +42,8 @@ while True:
     else:
         print('This is not a valid selection\n')
 
+from .lib import main_menu
+main_menu.game = game
 
 ## Main task
 thread = threading.Thread(target = main_menu.open, args = ())
@@ -56,4 +52,4 @@ thread.start()
 
 ## Panda3d task
 #Fix input
-render.run()
+game.renders[0].run()

@@ -2,24 +2,30 @@ import os
 
 import numpy
 
+from . import move
+from . import rendering_task
+
 home = "../3dchess"
 
 class game():
     def __init__(self, across_dimensions = 2, side_dimensions = 1, size_of_dimensions = (8,8,8)):
+
         self.across_dimensions = across_dimensions
         self.side_dimensions = side_dimensions
         self.dimensions = self.across_dimensions + self.side_dimensions
         self.unused_dimensions = 3 - self.dimensions
         self.size_of_dimensions = size_of_dimensions
 
+        self.renders = [rendering_task(self)]
+
     def restart(self):
         ##For starting a game of the same type
 
         self.turn = 0
 
-        # I think for enpassant
-        self.capturedposw = None
-        self.capturedposb = None
+        ## Determines where the next capture piece should go
+        self.next_captured_pos_white = (-2, -2)
+        self.next_captured_pos_black = (9, 9)
 
         self.moved_from_last_turn = (None,None,None)
         self.enpass = (None,None,None)
@@ -166,15 +172,50 @@ class game():
         piece = game_piece(piece_type, position, colour)
         self.pieces.append(piece)
 
-    def move_piece(self, piece, old_position, new_position):
+    ## Attempt to move a piece
+    def attempt_move(self, render, old_position, new_position):
+        my_move = move(self, render, old_position, new_position)
+
+        if my_move.is_valid == True:
+            self.move_piece(old_position, new_position, True)
+            self.update_turn()
+
+        return my_move.is_valid
+
+    ## Actually move a piece
+    def move_piece(self, old_position, new_position, main_move):
+
+        piece = self.board[old_position]
+
+        for render in self.renders:
+            if main_move == True:
+                render.unhighlight_last_moved_piece()
+                render.unhighlight_last_moved_board()
+            render.unrender_piece(piece)
+
         piece.position = new_position
         piece.moved_last_turn = True
 
-        self.board[old_position] = None
-        self.board[new_position] = piece
+        if all([(new_position[i] < self.size_of_dimensions[i] and
+                 new_position[i] >= 0
+                )
+                for i in range(self.dimensions)]):
+            self.board[old_position] = None
+            self.board[new_position] = piece
 
+        for render in self.renders:
+            render.render_piece(piece)
+            if main_move == True:
+                render.highlight_last_moved_board(old_position)
+                render.highlight_last_moved_piece(new_position)
 
+        if main_move != True:
+            print(f'A {piece.colour} {piece.piece_type} has been captured!\n')
 
+        if piece.piece_type == 'king':
+            # Todo
+            self.gameover = True
+            print (f'{1-piece.colour} wins!\n')
 
     def update_turn(self):
         if self.turn == 0:
