@@ -231,6 +231,9 @@ def alpha_position_to_list(command_fragment):
     if dimensions == 2:
         coordinates = [coordinates[1], coordinates[0]]
 
+    if dimensions == 3:
+        coordinates = [coordinates[1], coordinates[2], coordinates[0]]
+
 
     return tuple(coordinates)
 

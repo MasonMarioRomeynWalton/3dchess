@@ -5,16 +5,8 @@ make move class make sense
 finish finish rendering class
 test with changing trasparency of board
 rendering class should not be able to edit piece data through game
-change map named from 0/1 to black/white
+change map named from 0/1 to black/white (?)
 render bottom as one for better performance
-
-make python file for a movement with a boolean for castling/capturing
-
-make python files for game logic
-  import move
-  move piece()
-  take away piece()
-  add piece()
 
 finish the logic for the movement of the pieces
 merge main.py with client.py
@@ -30,7 +22,7 @@ make captured pieces a different color(purple or orange) and put them somewhere 
 make last captured piece cyan
 figure out who "press any key to" doesn't work
 
-Add possible piece locations in pink
+Add possible piece locations in orange
 Add check. Turn  king (purple/orange)
 
 ###

@@ -418,15 +418,15 @@ class move:
                 return
 
     def update(self):
+        self.render.unhighlight_last_moved_piece()
+        self.render.unhighlight_last_moved_board()
 
-
-        self.piece_render = self.render.board[(
-            self.render.change_pos_for_3d(self.old_position)
-        )].rel
-        self.render.unrender_piece(self.piece_render)
-
-        self.game.move_piece(self.piece, self.new_position)
+        self.render.unrender_piece(self.piece)
+        self.game.move_piece(self.piece, self.old_position, self.new_position)
         self.render.render_piece(self.piece)
+
+        self.render.highlight_last_moved_board(self.old_position)
+        self.render.highlight_last_moved_piece(self.new_position)
 
         # Got to find some way to attached it back to the old board
         #if move.castlingvar == False:

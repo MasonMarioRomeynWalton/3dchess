@@ -7,6 +7,7 @@ import itertools
 import numpy
 
 from . import controlable_camera
+from . import move
 
 home = "../../3dchess"
 
@@ -41,6 +42,12 @@ class rendering_task():
 
         ## The piece that is picked for capture
         self.picked_for_capture = None
+
+        ## The last moved piece
+        self.last_moved_piece = None
+
+        ## The place the last moved piece was moved from
+        self.last_moved_board = None
 
         ## Determines whether the rendering task should be updating
         ## For example:
@@ -133,6 +140,7 @@ class rendering_task():
             colour_list.append(f'last_moved_piece_{i}')
 
         colour_list.append(f'capture_board')
+        colour_list.append(f'last_moved_board')
 
         colour_list.append('grid')
         colour_list.append('post')
@@ -158,16 +166,24 @@ class rendering_task():
         self.pieces = self.render_pieces()
 
     def change_pos_for_3d(self, position):
+        ## First is side to side
+        ## Second is up and down
+        ## Third is across
         new_position = sum(map(tuple,[
                 (position[i] for i in range(self.game.across_dimensions)),
                 (0 for i in range(self.game.unused_dimensions)),
-                (position[-i-1] for i in range(self.game.side_dimensions))
+                (position[-i-1] for i in range(self.game.side_dimensions)),
             ]),
             ()
         )
 
         return new_position
 
+    def change_pos_back(self,position):
+        new_position = tuple(position[i] for i in range(3)
+                             if self.size_of_dimensions[i] != 1
+                            )
+        return new_position
 
     def render_generic_object(self, model, texture, game_position, rotation = [0,0,0], scale = [1,1,1]):
         rendered_object = loader.loadModel(model)
@@ -201,8 +217,7 @@ class rendering_task():
         return rendered_object
 
     def unrender_generic_object(self, rendered_object):
-        rendered_object.removeNode()
-        del rendered_object
+        rendered_object.obj.removeNode()
 
     def render_posts(self):
         
@@ -237,34 +252,34 @@ class rendering_task():
         return board
 
 
-    def render_board_segment(self, pos):
+    def render_board_segment(self, position):
 
-        top_colour = self.calculate_top_colour(pos)
-        bottom_colour = self.calculate_bottom_colour(pos)
+        top_colour = self.calculate_top_colour(position)
+        bottom_colour = self.calculate_bottom_colour(position)
 
         current_board_segment_render = board_segment_render(
-            pos,
+            position,
             self.colour_map[f'board_{top_colour}']
         )
 
         ## Because the board is rendered slightly lower than the pieces
-        pos = tuple(pos[i] if i != 1 else pos[i] - 0.5 for i in range(3))
+        position = tuple(position[i] if i != 1 else position[i] - 0.5 for i in range(3))
 
         current_board_segment_render.obj = self.render_generic_object(
             'board_piece.dae',
             f'board_{top_colour}',
-            pos
+            position
         )
 
         current_board_segment_render.obj.setPythonTag('object_attributes', current_board_segment_render)
 
         ## The bottom section of the board is rendered slightly lower than the top
-        pos = tuple(pos[i] if i != 1 else pos[i] - 0.0005 for i in range(3))
+        position = tuple(position[i] if i != 1 else position[i] - 0.0005 for i in range(3))
 
         current_board_segment_render.bottom = self.render_generic_object(
             'board_piece.dae',
             None,
-            pos
+            position
         )
 
         current_board_segment_render.bottom.setColorScale(bottom_colour[0],bottom_colour[1],bottom_colour[2],0)
@@ -314,7 +329,8 @@ class rendering_task():
 
         ## Removes all the board pieces
         for index, x in numpy.ndenumerate(self.board):
-            unrender_generic_object(self.board[index].obj)
+            unrender_generic_object(self.board[index])
+            self.board[index] = None
 
     def render_pieces(self):
         ## renders all the pieces
@@ -328,16 +344,8 @@ class rendering_task():
         
         return pieces
 
-
-            # Some of this stuff is for making sure moved last turn pieces are highlighted at start of game
-
-            #self.game.pieces[u].atr['obj'].setPythonTag('piece',self.game.pieces[u].atr)
-            #if self.game.pieces[u].atr['pos'][2]-1 >= 0:
-            #    self.game.pieces[u].atr['rel'] = self.board[self.game.pieces[u].atr['pos'][1]-1][self.game.pieces[u].atr['pos'][2]-1][self.game.pieces[u].atr['pos'][0]-1]
-            #    self.board[self.game.pieces[u].atr['pos'][1]-1][self.game.pieces[u].atr['pos'][2]-1][self.game.pieces[u].atr['pos'][0]-1].atr['rel'] = self.game.pieces[u]
-            #if self.game.pieces[u].atr['moved_last_turn'] == True:
-            #    self.highlight_piece(self.game.pieces[u].atr,'piece')
-
+        # Need to figure out captured pieces
+        # For making sure moved last turn pieces are highlighted at start of game
         if not None in self.game.moved_from_last_turn:
             self.board[self.game.moved_from_last_turn[1]-1][self.game.moved_from_last_turn[2]-1][self.game.moved_from_last_turn[0]-1].atr['obj'].setTexture(self.colour_map['last_moved_board'])
 
@@ -361,8 +369,18 @@ class rendering_task():
         return current_piece_render
 
 
-    def unrender_piece(self,piece):
-        self.unrender_generic_object(piece.obj)
+    def unrender_piece(self, piece):
+        board_render = self.board[self.change_pos_for_3d(piece.position)]
+
+        ## Check if picked for move or picked for capture are going to be unrendered
+        if board_render.rel == self.picked_for_move:
+            self.picked_for_move = None
+        if board_render.rel == self.picked_for_capture:
+            self.picked_for_capture = None
+
+        self.unrender_generic_object(board_render.rel)
+        board_render.rel = None
+
 
     def unrender_pieces(self):
         ## unrenders all the pieces
@@ -421,111 +439,133 @@ class rendering_task():
 
         highlight_piece.obj.setTexture(colour)
 
+    def unhighlight_last_moved_piece(self):
+        if self.last_moved_piece != None:
+            self.last_moved_piece.moved_last_turn = False
+            self.highlight_piece(self.last_moved_piece,'piece')
+            self.last_moved_piece = None
+
+    def unhighlight_last_moved_board(self):
+        if self.last_moved_board != None:
+            self.last_moved_board.moved_last_turn = False
+            self.highlight_piece(self.last_moved_board,'board')
+            self.last_moved_board = None
+
+    def highlight_last_moved_piece(self, position):
+        board_render = self.board[self.change_pos_for_3d(position)]
+        self.last_moved_piece = board_render.rel
+
+        self.last_moved_piece.moved_last_turn = True
+        self.highlight_piece(self.last_moved_piece,'piece')
+
+    def highlight_last_moved_board(self, position):
+        board_render = self.board[self.change_pos_for_3d(position)]
+        self.last_moved_board = board_render
+
+        self.last_moved_board.moved_last_turn = True
+        self.highlight_piece(self.last_moved_board,'board')
+
+    def select_object(self):
+        ## Try to pick the next piece
+        try:
+            mpos = base.mouseWatcherNode.getMouse()
+        except:
+            print('You clicked off the screen\n')
+
+        self.pickerRay.setFromLens(base.camNode, mpos.getX(), mpos.getY())
+        self.myTraverser.traverse(render)
+        if self.queue.getNumEntries() > 0:
+            self.queue.sortEntries()
+            selected_object = self.queue.getEntry(0).getIntoNodePath()
+            selected_object = selected_object.findNetPythonTag('object_attributes')
+            selected_object = selected_object.getNetPythonTag('object_attributes')
+
+            return selected_object
+
+        else:
+            return None
+
 
     def select_move_piece(self):
         #Change to move(x,y,z)
 
+        ## Unhighlight the previous piece
         if self.picked_for_move != None:
             self.picked_for_move.is_picked_for_move = False
             self.highlight_piece(self.picked_for_move,'piece')
             self.picked_for_move = None
 
-        try:
-            mpos = base.mouseWatcherNode.getMouse()
-        except:
-            print('You clicked off the screen\n')
+        selected_object = self.select_object()
 
-        self.pickerRay.setFromLens(base.camNode, mpos.getX(), mpos.getY())
-        self.myTraverser.traverse(render)
-        if self.queue.getNumEntries() > 0:
-            self.queue.sortEntries()
-            pickedObj = self.queue.getEntry(0).getIntoNodePath()
-            pickedObj = pickedObj.findNetPythonTag('object_attributes')
-            pickedObj = pickedObj.getNetPythonTag('object_attributes')
-
-            if type(pickedObj) == piece_render:
-                self.picked_for_move = pickedObj
+        if selected_object != None:
+            if type(selected_object) == piece_render:
+                self.picked_for_move = selected_object
                 self.picked_for_move.is_picked_for_move = True
                 self.highlight_piece(self.picked_for_move,'piece')
 
     def select_capture_location(self):
+
+        ## Unhighlight the previous piece
         if self.picked_for_capture != None:
             self.picked_for_capture.is_picked_for_capture = False
             self.highlight_piece(self.picked_for_capture,'piece')
             self.picked_for_capture = None
 
+        ## Unhighlight the previous board
         if self.picked_for_capture_board != None:
             self.picked_for_capture_board.is_picked_for_capture = False
             self.highlight_piece(self.picked_for_capture_board,'board')
             self.picked_for_capture = None
 
-        try:
-            mpos = base.mouseWatcherNode.getMouse()
-        except:
-            print('You clicked off the screen\n')
-            return
+        selected_object = self.select_object()
 
-        self.pickerRay.setFromLens(base.camNode, mpos.getX(), mpos.getY())
-        self.myTraverser.traverse(render)
-        if self.queue.getNumEntries() > 0:
-            self.queue.sortEntries()
-            pickedObj = self.queue.getEntry(0).getIntoNodePath()
-            pickedObj = pickedObj.findNetPythonTag('object_attributes')
-            pickedObj = pickedObj.getNetPythonTag('object_attributes')
+        if selected_object != None:
 
             ## If they clicked on a board
-            if type(pickedObj) == board_segment_render:
-                self.picked_for_capture_board = pickedObj
+            if type(selected_object) == board_segment_render:
+                self.picked_for_capture_board = selected_object
                 if self.picked_for_capture_board.rel != None:
                     self.picked_for_capture = self.picked_for_capture_board.rel
                 else:
                     self.picked_for_capture = None
             
             ## If they clicked on a piece
-            if type(pickedObj) == piece_render:
-                self.picked_for_capture = pickedObj
-
+            if type(selected_object) == piece_render:
+                self.picked_for_capture = selected_object
                 self.picked_for_capture_board = self.board[self.picked_for_capture.position]
 
+            ## Highlight the board
             if self.picked_for_capture_board != None:
                 self.picked_for_capture_board.is_picked_for_capture = True
                 self.highlight_piece(self.picked_for_capture_board, 'board')
 
+            ## Highlight the piece
             if self.picked_for_capture != None:
                 self.picked_for_capture.is_picked_for_capture = True
                 self.highlight_piece(self.picked_for_capture, 'piece')
 
-
-            # Add ox ny stuff
-
     def move_piece(self):
-        if self.game.gameover == 1 or self.game.gameover == 2:
-            print('The game is already over!\n')
-            time.sleep(0.1)
-            return
-        self.valid = 1
         if self.picked_for_move == None:
             print('You must select a piece to move\n')
-            self.valid = 0
-        elif self.picked_for_move.position[2] < 0:
-            print('You may not move a piece that has already been captured\n')
-            self.valid = 0
-        if self.picked_for_capture == None:
+        elif self.picked_for_capture_board == None:
             print('You must select a place to move to\n')
-            self.valid = 0
-        elif self.picked_for_capture.position[2] < 0:
-            print('You may not capture a piece that has already been captured\n')
-            self.valid = 0
-        if self.valid == 1:
-            self.move.findpiece()
+        else:
+            old_position = self.change_pos_back(self.picked_for_move.position)
+            new_position = self.change_pos_back(self.picked_for_capture_board.position)
+            if (move(self.game, self, old_position, new_position)):
+                if self.picked_for_move != None:
+                    self.picked_for_move.is_picked_for_move = False
+                    self.highlight_piece(self.picked_for_move,'piece')
+                    self.picked_for_move = None
 
-        self.picked_for_capture = None
-
-        if hasattr(self.move,'valid'):
-            if self.move.valid == 1:
-                self.reset()
-                self.picked_for_move = None
-
+        if self.picked_for_capture != None:
+            self.picked_for_capture.is_picked_for_capture = False
+            self.highlight_piece(self.picked_for_capture,'piece')
+            self.picked_for_capture = None
+        if self.picked_for_capture_board != None:
+            self.picked_for_capture_board.is_picked_for_capture = False
+            self.highlight_piece(self.picked_for_capture_board,'board')
+            self.picked_for_capture_board = None
 
     def check_for_input(self, camera, task):
         movement_distance = self.time_elapsed*20
@@ -589,7 +629,7 @@ class board_segment_render():
 
         self.colour = colour
         self.is_picked_for_move = None
-        self.picked_for_capture = False
+        self.is_picked_for_capture = False
         self.moved_last_turn = False
 
 class piece_render():

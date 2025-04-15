@@ -16,10 +16,13 @@ class game():
         ##For starting a game of the same type
 
         self.turn = 0
+
+        # I think for enpassant
         self.capturedposw = None
         self.capturedposb = None
-        self.moved_from_last_turn = [None,None,None]
-        self.enpass = [None,None,None]
+
+        self.moved_from_last_turn = (None,None,None)
+        self.enpass = (None,None,None)
         self.gameover = False
 
         self.board = self.create_board()
@@ -163,8 +166,15 @@ class game():
         piece = game_piece(piece_type, position, colour)
         self.pieces.append(piece)
 
-    def move_piece(self, piece, new_position):
+    def move_piece(self, piece, old_position, new_position):
         piece.position = new_position
+        piece.moved_last_turn = True
+
+        self.board[old_position] = None
+        self.board[new_position] = piece
+
+
+
 
     def update_turn(self):
         if self.turn == 0:
