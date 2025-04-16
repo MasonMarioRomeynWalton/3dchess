@@ -1,10 +1,8 @@
-Make move rules based on in-play pieces
+Make move rules menu based on in-play pieces
 finish read
 finish update
-make move class make sense
 finish finish rendering class
 test with changing trasparency of board
-rendering class should not be able to edit piece data through game
 change map named from 0/1 to black/white (?)
 render bottom as one for better performance
 
@@ -18,12 +16,21 @@ QOL:
 
 change camera movement to the mouse
 make quit function
-make captured pieces a different color(purple or orange) and put them somewhere else
-make last captured piece cyan
+
+Selecting Orange
+Can move Magenta
+Last moved Cyan
+To capture Green
+Dead Azure
+Check Purple
+
+
+
+make captured pieces orange and put them somewhere else
 figure out who "press any key to" doesn't work
 
 Add possible piece locations in orange
-Add check. Turn  king (purple/orange)
+Add check. Turn  king purple
 
 ###
 
