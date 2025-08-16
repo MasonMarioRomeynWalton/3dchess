@@ -1,18 +1,26 @@
 # 3dchess
 
-To install pip run:
+A simulation of 8 by 8 by 8 chess with some simple extra pieces to account for the three-dimensional nature of the game.
+
+# Installation
+
+Install python3 although it is likely already installed on your system.
+
+Install pip with:
 
 `sudo apt-get install python3-pip`
 
-To install depedecies run:
+To install dependencies run:
 
 `pip install -r requirements.txt`
 
-To run:
+To start the game run:
 
-`python -m 3dchess`
+`python3 -m 3dchess`
 
 
-##Other
+# Dependencies
+
+If you think the dependency file is not up-to-date, run
 
 `pip-compile requirements.in --allow-unsafe --strip-extras`
