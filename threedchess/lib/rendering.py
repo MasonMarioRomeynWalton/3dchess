@@ -293,13 +293,11 @@ class rendering_task():
         if self.game.dimensions == 1:
             colour_index = 0
 
-        elif self.game.dimensions == 3:
-            colour_index = (pos[0]%2+(pos[1]%2)*2+(pos[2]%2)*4)%8
+        if self.game.dimensions == 2:
+            colour_index = 1-sum(pos)%2
 
-        else:
-            colour_index = sum(pos)%2
-            if colour_index == 1:
-                colour_index = 7
+        elif self.game.dimensions == 3:
+            colour_index = (pos[0] + pos[1])%2*2 + (pos[1] + pos[2])%2*4 + sum(pos)%2
 
         return colour_index
 

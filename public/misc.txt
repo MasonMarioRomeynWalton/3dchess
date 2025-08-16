@@ -1,6 +1,22 @@
-
-
-
-
-
-
+{
+    "turn": 0,
+    "next_captured_pos_white": [
+        -2,
+        -2
+    ],
+    "next_captured_pos_black": [
+        9,
+        9
+    ],
+    "moved_from_last_turn": [
+        null,
+        null,
+        null
+    ],
+    "enpass": [
+        null,
+        null,
+        null
+    ],
+    "gameover": false
+}

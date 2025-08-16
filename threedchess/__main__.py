@@ -23,20 +23,20 @@ sys.excepthook = show_exception_and_exit
 ##
 
 #game = game(0,1,(8,))
-game = game(1,1,(8,8))
+#game = game(1,1,(8,8))
 #game = game(2,0,(8,8))
-#game = game(2,1,(8,8,8))
+game = game(2,1,(8,8,8))
 
 # Move to command line task
 while True:
     print('Load from a saved file? (y/n)')
     savefile = input()
     print('')
+    print_controls()
     if savefile == 'y':
-        game.open()
+        game.open_from_save()
         break
     elif savefile == 'n':
-        print_controls()
         game.restart()
         break
     else:
