@@ -2,6 +2,8 @@
 
 A simulation of 8 by 8 by 8 chess with some simple extra pieces to account for the three-dimensional nature of the game.
 
+![Sample image of the board after a few moves](/static/sample_image.png)
+
 # Installation
 
 Install python3 although it is likely already installed on your system.
