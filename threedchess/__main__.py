@@ -13,6 +13,7 @@ from .lib import print_controls
 
 ##
 
+
 def show_exception_and_exit(exc_type, exc_value, tb):
     traceback.print_exception(exc_type, exc_value, tb)
     print('Press any key to exit.')
@@ -21,7 +22,6 @@ def show_exception_and_exit(exc_type, exc_value, tb):
 sys.excepthook = show_exception_and_exit
 
 ##
-
 #game = game(0,1,(8,))
 #game = game(1,1,(8,8))
 #game = game(2,0,(8,8))

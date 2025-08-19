@@ -16,11 +16,16 @@ class move:
             for i in range(self.game.dimensions)
         )
 
-        self.sorted_distance = sorted(self.distance_between_positions)
+        self.sorted_distance = tuple(sorted(
+            (distance for distance in self.distance_between_positions
+             if distance != 0
+            )
+        ))
 
         # Not sure
         self.castling_movement = castling_movement
 
+        ## Checks if the move is valid
         self.is_valid = self.process_move()
 
 
@@ -46,7 +51,6 @@ class move:
         ## Check if the piece is a valid colour
         if not self.piece.colour == self.game.turn:
             print('This piece is not a valid colour\n')
-            self.valid = 0
             return False
 
         ## Find if there's a piece in the new location
@@ -166,77 +170,55 @@ class move:
 #                print('This is not a valid location\n')
 #                return 0
 #
-#        if self.piece.atr['typ'] == 'knight':
-#            if (self.dl[0] != 0 or self.dl[1] != 1 or self.dl[2]) != 2:
-#                pass
-#            else:
-#                print('This is not a valid location\n')
-#                self.valid = 0
-#
-#        if self.piece.atr['typ'] == 'horse':
-#            if self.dl[0] == 1 and self.dl[1] == 1 and self.dl[2] == 2:
-#                pass
-#            else:
-#                print('This is not a valid location\n')
-#                self.valid = 0
-#        if self.piece.atr['typ'] == 'elephant':
-#            if self.dl[0] == 1 and self.dl[1] == 2 and self.dl[2] == 2:
-#                pass
-#            else:
-#                print('This is not a valid location\n')
-#                self.valid = 0
-#        if self.piece.atr['typ'] == 'rook':
-#            if self.dl[0] == 0 and self.dl[1] == 0:
-#                self.rookpath()
-#            else:
-#                print('This is not a valid location\n')
-#                self.valid = 0
-#        if self.piece.atr['typ'] == 'bishop':
-#            if (self.dx == self.dy and self.dz == 0) or (self.dx == self.dz and self.dy == 0) or (self.dy == self.dz and self.dx == 0):
-#                self.bishoppath()
-#            else:
-#                print('This is not a valid location\n')
-#                self.valid = 0
-#        if self.piece.atr['typ'] == 'cardinal':
-#            if (self.dx == self.dy and self.dx == self.dz):
-#                self.cardinalpath()
-#            else:
-#                print('This is not a valid location\n')
-#                self.valid = 0
-#        if self.piece.atr['typ'] == 'queen':
-#            if self.dl[0] == 0 and self.dl[1] == 0:
-#                self.rookpath()
-#            elif (self.dx == self.dy and self.dz == 0) or (self.dx == self.dz and self.dy == 0) or (self.dy == self.dz and self.dx == 0):
-#                self.bishoppath()
-#            else:
-#                print('This is not a valid location\n')
-#                self.valid = 0
-#        if self.piece.atr['typ'] == 'duchess':
-#            if self.dl[0] == 0 and self.dl[1] == 0:
-#                self.rookpath()
-#            elif (self.dx == self.dy and self.dx == self.dz):
-#                self.cardinalpath()
-#            else:
-#                print('This is not a valid location\n')
-#                self.valid = 0
-#        if self.piece.atr['typ'] == 'princess':
-#            if (self.dx == self.dy and self.dz == 0) or (self.dx == self.dz and self.dy == 0) or (self.dy == self.dz and self.dx == 0):
-#                self.bishoppath()
-#            elif (self.dx == self.dy and self.dx == self.dz):
-#                self.cardinalpath()
-#            else:
-#                print('This is not a valid location\n')
-#                self.valid = 0
-#        if self.piece.atr['typ'] == 'pope':
-#            if self.dl[0] == 0 and self.dl[1] == 0:
-#                self.rookpath()
-#            elif (self.dx == self.dy and self.dz == 0) or (self.dx == self.dz and self.dy == 0) or (self.dy == self.dz and self.dx == 0):
-#                self.bishoppath()
-#            elif (self.dx == self.dy and self.dx == self.dz):
-#                self.cardinalpath()
-#            else:
-#                print('This is not a valid location\n')
-#                self.valid = 0
+        if self.piece.piece_type == 'knight':
+            if not self.knight_path((1,2)):
+                print('This is not a valid location\n')
+                return False
+
+        if self.piece.piece_type == 'horse':
+            if not self.knight_path((1,1,2)):
+                print('This is not a valid location\n')
+                return False
+
+        if self.piece.piece_type == 'elephant':
+            if not self.knight_path((1,2,2)):
+                print('This is not a valid location\n')
+                return False
+
+        if self.piece.piece_type == 'rook':
+            if not self.queen_path({1}):
+                print('This is not a valid location\n')
+                return False
+
+        if self.piece.piece_type == 'bishop':
+            if not self.queen_path({2}):
+                print('This is not a valid location\n')
+                return False
+
+        if self.piece.piece_type == 'cardinal':
+            if not self.queen_path({3}):
+                print('This is not a valid location\n')
+                return False
+
+        if self.piece.piece_type == 'queen':
+            if not self.queen_path({1,2}):
+                print('This is not a valid location\n')
+                return False
+
+        if  self.piece.piece_type == 'duchess':
+            if not self.queen_path({1,3}):
+                print('This is not a valid location\n')
+                return False
+
+        if  self.piece.piece_type == 'princess':
+            if not self.queen_path({2,3}):
+                print('This is not a valid location\n')
+                return False
+
+        if  self.piece.piece_type == 'pope':
+            if not self.queen_path({1,2,3}):
+                print('This is not a valid location\n')
+                return False
 
         if self.capture == True:
             if self.piece.colour == 0:
@@ -246,7 +228,7 @@ class move:
 
             self.game.move_piece(self.new_position, capture_position, 'capture')
 
-            # Something about finding the next place the captured piece goes to
+            # Finding where the next captured piece goes below the board
 #            if move2.piece.atr['col'] == 1:
 #                game.capturedposg = game.capturedposw
 #            if move2.piece.atr['col'] == -1:
@@ -285,13 +267,10 @@ class move:
 #            for u in range(len(game.pieces)):
 #                if game.pieces[u].atr['moved_last_turn'] == True:
 #                    game.pieces[u].atr['moved_last_turn'] = False
-#                    game.write(f'{home}/public/pieces.txt',None,f'[{game.pieces[u].atr["typ"]},({game.pieces[u].atr["pos"][0]},{game.pieces[u].atr["pos"][1]},{game.pieces[u].atr["pos"][2]}),{game.pieces[u].atr["col"]},{game.pieces[u].atr["first"]},{game.pieces[u].atr["moved_last_turn"]}]',u)
 #                    app.rendersi(game.pieces[u].atr,'piece')
 #            move.piece.atr['moved_last_turn'] = True
-#            game.write(f'{home}/public/pieces.txt',None,f'[{self.piece.atr["typ"]},({self.piece.atr["pos"][0]},{self.piece.atr["pos"][1]},{self.piece.atr["pos"][2]}),{self.piece.atr["col"]},{self.piece.atr["first"]},{self.piece.atr["moved_last_turn"]}]',self.term)
 #            try:
 #                move.move3.piece.atr['moved_last_turn'] = True
-#                game.write(f'{home}/public/pieces.txt',None,f'[{move.move3.piece.atr["typ"]},({move.move3.piece.atr["pos"][0]},{move.move3.piece.atr["pos"][1]},{move.move3.piece.atr["pos"][2]}),{move.move3.piece.atr["col"]},{move.move3.piece.atr["first"]},{move.move3.piece.atr["moved_last_turn"]}]',move.move3.term)
 #                app.rendersi(move.move3.piece.atr,'piece')
 #            except:
 #                pass
@@ -341,82 +320,33 @@ class move:
             else:
                 print('This is not a valid piece\n')
 
-    # Make decorator for this
+    def queen_path(self, dimensions):
+        ## Check if the move is only in the exact number of dimesions
+        if not len(self.sorted_distance) in dimensions:
+            print(dimensions)
+            return False
+
+        ## Check if the move is in a straight line
+        elif len(set(self.sorted_distance)) != 1:
+            print(set(self.sorted_distance))
+            print(len(set(self.sorted_distance)))
+            return False
+
+        else:
+            return True
+
+        ## Check for collisions
+        # To complete
+        # Figure out direction
+        #for u in range (1, self.sorted_distance[0]):
+            #square = min(self.new_position, self.old_position)
+            #if board[self.] != None
+
+    def knight_path(self, distances):
+        if self.sorted_distance == distances:
+            return True
+        else:
+            return False
 
 
-    def rookpath(self):
-        if self.dx != 0:
-            d = 0
-            da = [self.ox-1,self.nx-1]
-            de = [0,self.piece.atr['pos'][1]-1,self.piece.atr['pos'][2]-1]
-        if self.dy != 0:
-            d = 1
-            da = [self.oy-1,self.ny-1]
-            de = [self.piece.atr['pos'][0]-1,0,self.piece.atr['pos'][2]-1]
-        if self.dz != 0:
-            d = 2
-            da = [self.oz-1,self.nz-1]
-            de = [self.piece.atr['pos'][0]-1,self.piece.atr['pos'][1]-1,0]
-        if (da[0] - da[1]) > 0:
-            pos1 = -1
-        else:
-            pos1 = 1
-        for u in range(1,self.dl[2]):
-            de[d] = u*pos1 + da[0]
-            if 'rel' in (app.board[de[1]][de[2]][de[0]].atr.keys()):
-                print(f'You can not move {self.piece.atr["typ"]}s through other pieces\n')
-                self.valid = 0
-                return
-
-    def bishoppath(self):
-        if self.dx == 0:
-            d = [1,2]
-            da = [self.oy-1,self.ny-1]
-            db = [self.oz-1,self.nz-1]
-            de = [self.piece.atr['pos'][0]-1,0,0]
-        if self.dy == 0:
-            d = [0,2]
-            da = [self.ox-1,self.nx-1]
-            db = [self.oz-1,self.nz-1]
-            de = [0,self.piece.atr['pos'][1]-1,0]
-        if self.dz == 0:
-            d = [0,1]
-            da = [self.ox-1,self.nx-1]
-            db = [self.oy-1,self.ny-1]
-            de = [0,0,self.piece.atr['pos'][2]-1]
-        if (da[0] - da[1]) > 0:
-            pos1 = -1
-        else:
-            pos1 = 1
-        if (db[0] - db[1]) > 0:
-            pos2 = -1
-        else:
-            pos2 = 1
-        for u in range (1,self.dl[2]):
-            de[d[0]] = u*pos1 + da[0]
-            de[d[1]] = u*pos2 + db[0]
-            if 'rel' in (app.board[de[1]][de[2]][de[0]].atr.keys()):
-                print(f'You can not move {self.piece.atr["typ"]}s through other pieces\n')
-                self.valid = 0
-                return
-
-    def cardinalpath(self):
-        if (self.ox-self.nx) > 0:
-            pos1 = -1
-        else:
-            pos1 = 1
-        if (self.oy-self.ny) > 0:
-            pos2 = -1
-        else:
-            pos2 = 1
-        if (self.oz-self.nz) > 0:
-            pos3 = -1
-        else:
-            pos3 = 1
-        for u in range (1,self.dl[2]):
-            de = [u*pos1+self.ox-1,u*pos2+self.oy-1,u*pos3+self.oz-1]
-            if 'rel' in (app.board[de[1]][de[2]][de[0]].atr.keys()):
-                print(f'You can not move {self.piece.atr["typ"]}s through other pieces\n')
-                self.valid = 0
-                return
 

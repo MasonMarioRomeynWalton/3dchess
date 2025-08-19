@@ -1,6 +1,6 @@
+finish movement
+finish command_line
 Make move rules menu based on in-play pieces
-finish read
-finish update
 finish finish rendering class
 test with changing trasparency of board
 change map named from 0/1 to black/white (?)

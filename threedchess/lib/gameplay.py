@@ -52,7 +52,7 @@ class game():
 
         ## Load all the pieces
         white_pieces = [
-            self.create_piece(
+            game_piece(
                 piece['piece_type'],
                 piece['position'],
                 0
@@ -62,7 +62,7 @@ class game():
 
         ## Finds where the black pieces by mirroring the white pieces
         black_pieces = [
-            self.create_piece(
+            game_piece(
                 piece['piece_type'],
                 tuple(
                     self.size_of_dimensions[0:self.across_dimensions][i] -
@@ -89,7 +89,7 @@ class game():
 
 
     def create_piece(self, piece_type, position, colour, has_moved = False, moved_last_turn = False):
-        return game_piece(piece_type, position, colour, has_moved, moved_last_turn)
+        self.pieces.append(game_piece(piece_type, position, colour, has_moved, moved_last_turn))
 
     ## Attempt to move a piece
     def attempt_move(self, render, old_position, new_position):
@@ -196,41 +196,30 @@ class game():
         self.gameover = misc_save['gameover']
 
         self.board = numpy.empty(self.size_of_dimensions, dtype=object)
-        self.pieces = []
 
         with open(f'{home}/public/pieces.txt','r') as f:
             json_piece_save = f.read()
         piece_save = json.loads(json_piece_save)
 
-        for piece in piece_save:
-            self.create_piece(piece['piece_type'],
+        self.pieces = [
+            game_piece(piece['piece_type'],
                               piece['position'],
                               piece['colour'],
                               piece['has_moved'],
                               piece['moved_last_turn']
                              )
+            for piece in piece_save
+        ]
 
     def write(self,file,prefix,content,piece_num):
         return
-        with open(file,'r') as f:
-            self.save = file_reader.readlines()
-            self.space = self.save[piece_num].find(' ')
-            if prefix == None:
-                self.name = self.save[piece_num][0:self.space+1]
-            else:
-                self.name = prefix
-            self.save[piece_num] = (self.name+content+'\n')
-            self.reader.close()
-            self.writer = open(file,'w')
-            self.writer.writelines(self.save)
-            self.writer.close()
 
 class game_board:
     def __init__(self):
         pass
 
 class game_piece:
-    def __init__(self,piece_type,position,colour,has_moved,moved_last_turn):
+    def __init__(self,piece_type, position, colour, has_moved = False, moved_last_turn = False):
         self.piece_type = piece_type
         self.position = position
         self.colour = colour
