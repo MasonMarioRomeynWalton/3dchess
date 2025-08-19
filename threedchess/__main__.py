@@ -1,11 +1,8 @@
 #!/bin/python3
 
 from direct.stdpy import threading
-import os
 import sys
 import traceback
-import time
-from math import *
 
 from .lib import game
 from .lib import rendering_task

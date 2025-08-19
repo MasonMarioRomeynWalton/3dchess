@@ -1,4 +1,3 @@
-# Maybe make different movement types different classes
 class move:
     def __init__(self, game, render, old_position, new_position, castling_movement = False):
 
@@ -13,6 +12,11 @@ class move:
 
         self.distance_between_positions = tuple(
             abs(self.old_position[i] - self.new_position[i])
+            for i in range(self.game.dimensions)
+        )
+
+        self.displacement_between_positions = tuple(
+            self.old_position[i] - self.new_position[i]
             for i in range(self.game.dimensions)
         )
 
@@ -323,24 +327,32 @@ class move:
     def queen_path(self, dimensions):
         ## Check if the move is only in the exact number of dimesions
         if not len(self.sorted_distance) in dimensions:
-            print(dimensions)
             return False
 
         ## Check if the move is in a straight line
         elif len(set(self.sorted_distance)) != 1:
-            print(set(self.sorted_distance))
-            print(len(set(self.sorted_distance)))
             return False
 
-        else:
-            return True
+        ## Check for collisions in the straight line
+        for distance in range (1, self.sorted_distance[0]):
 
-        ## Check for collisions
-        # To complete
-        # Figure out direction
-        #for u in range (1, self.sorted_distance[0]):
-            #square = min(self.new_position, self.old_position)
-            #if board[self.] != None
+            ## How far from the old position to look
+            offset = [
+                int(copysign(distance,-direction))
+                for direction in self.displacement_between_positions
+            ]
+
+            ## The current square being checked
+            current_square = tuple(
+                square+offset
+                for square, offset in zip(self.old_position, offset)
+            )
+            
+            ## Checking the square
+            if self.game.board[current_square] != None:
+                return False
+
+        return True
 
     def knight_path(self, distances):
         if self.sorted_distance == distances:
@@ -349,4 +361,12 @@ class move:
             return False
 
 
+
+def copysign(x,y):
+    if y > 0:
+        return x
+    elif y < 0:
+        return -x
+    else:
+        return 0
 

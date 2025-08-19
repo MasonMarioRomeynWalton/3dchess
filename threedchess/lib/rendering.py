@@ -168,20 +168,19 @@ class rendering_task():
         ## First is side to side
         ## Second is up and down
         ## Third is across
-        new_position = sum(map(tuple,[
-                (position[i] for i in range(self.game.across_dimensions)),
-                (0 for i in range(self.game.unused_dimensions)),
-                (position[-i-1] for i in range(self.game.side_dimensions)),
-            ]),
-            ()
+        new_position = (
+            tuple(position[i] for i in range(self.game.across_dimensions)) +
+            tuple(0 for i in range(self.game.unused_dimensions)) +
+            tuple(position[-i-1] for i in range(self.game.side_dimensions))
         )
 
         return new_position
 
     def change_pos_back(self,position):
-        new_position = tuple(position[i] for i in range(3)
-                             if self.size_of_dimensions[i] != 1
-                            )
+        new_position = tuple([
+            position[i] for i in range(3)
+            if self.size_of_dimensions[i] != 1
+        ])
         return new_position
 
     def render_generic_object(self, model, texture, game_position, rotation = [0,0,0], scale = [1,1,1]):
