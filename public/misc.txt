@@ -1,12 +1,14 @@
 {
     "turn": 0,
     "next_captured_pos_white": [
-        -2,
-        -2
-    ],
-    "next_captured_pos_black": [
+        9,
         9,
         9
+    ],
+    "next_captured_pos_black": [
+        -2,
+        -2,
+        0
     ],
     "moved_from_last_turn": [
         null,

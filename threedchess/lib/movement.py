@@ -52,7 +52,7 @@ class move:
         ## Find if there's a piece in the new location
         self.piece_for_capture = self.game.board[(self.new_position)]
 
-        ## Check if you already have a piece in the new location
+        ## Check if there is already have a piece in the new location
         if (self.piece_for_capture != None):
             if self.piece.colour == self.piece_for_capture.colour:
                 print('You already have a piece here\n')
@@ -244,9 +244,9 @@ class move:
             if self.piece.colour == 1:
                 capture_position = self.game.next_captured_pos_white
 
-            self.game.move_piece(self.new_position, capture_position, False)
+            self.game.move_piece(self.new_position, capture_position, 'capture')
 
-            # Something about making sure the captured pieces don't overlap
+            # Something about finding the next place the captured piece goes to
 #            if move2.piece.atr['col'] == 1:
 #                game.capturedposg = game.capturedposw
 #            if move2.piece.atr['col'] == -1:

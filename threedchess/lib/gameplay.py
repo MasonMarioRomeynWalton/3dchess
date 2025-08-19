@@ -26,9 +26,13 @@ class game():
         self.turn = 0
 
         ## Determines where the next capture piece should go
-        self.next_captured_pos_white = (-2, -2)
-        self.next_captured_pos_black = (9, 9)
+        self.next_captured_pos_white = (9,9,9)
+        self.next_captured_pos_black = (
+            (-2,)*self.across_dimensions +
+            (0,)*self.side_dimensions
+        )
 
+        ## Initialises global variables
         self.moved_from_last_turn = (None,None,None)
         self.enpass = (None,None,None)
         self.gameover = False
@@ -36,61 +40,74 @@ class game():
         ## Create the board
         self.board = numpy.empty(self.size_of_dimensions, dtype=object)
 
-        self.pieces = []
-
-        self.layout = piece_layouts.get_piece_layout(self.dimensions, self.size_of_dimensions, self.unused_dimensions, self.across_dimensions, self.side_dimensions)
-
-    
-        for piece in self.layout:
-            self.create_piece(piece['piece_type'],
-                              piece['position'],
-                              0
-                             )
+        ## Import the layour of the pieces
+        self.layout = piece_layouts.get_piece_layout(
+            self.dimensions,
+            self.size_of_dimensions,
+            self.unused_dimensions,
+            self.across_dimensions,
+            self.side_dimensions
+        )
 
 
+        ## Load all the pieces
+        white_pieces = [
             self.create_piece(
                 piece['piece_type'],
-                tuple(self.size_of_dimensions[0:self.across_dimensions][i] -
-                      piece['position'][0:self.across_dimensions][i] -
-                      1
-                      for i in range(self.across_dimensions)
-                     ) +
-                (piece['position'][self.across_dimensions:]),
+                piece['position'],
+                0
+            )
+            for piece in self.layout
+        ]
+
+        ## Finds where the black pieces by mirroring the white pieces
+        black_pieces = [
+            self.create_piece(
+                piece['piece_type'],
+                tuple(
+                    self.size_of_dimensions[0:self.across_dimensions][i] -
+                    piece['position'][0:self.across_dimensions][i] -
+                    1
+                    for i in range(self.across_dimensions)
+                ) + (piece['position'][self.across_dimensions:]),
                 1
             )
+            for piece in self.layout
+        ]
 
+        self.pieces = white_pieces + black_pieces
+
+
+
+        ## Add the pieces to the board
         for piece in self.pieces:
            self.board[piece.position] = piece 
 
+        ## Initialise the savefile
         self.update_save()
 
 
 
-    def create_piece_row(self, piece_type, position, colour):
-        for i in range(0, self.size_of_dimensions[-1]): 
-            self.create_piece(piece_type, position+(i,), colour)
-
     def create_piece(self, piece_type, position, colour, has_moved = False, moved_last_turn = False):
-        piece = game_piece(piece_type, position, colour, has_moved, moved_last_turn)
-        self.pieces.append(piece)
+        return game_piece(piece_type, position, colour, has_moved, moved_last_turn)
 
     ## Attempt to move a piece
     def attempt_move(self, render, old_position, new_position):
         my_move = move(self, render, old_position, new_position)
 
         if my_move.is_valid == True:
-            self.move_piece(old_position, new_position, True)
+            self.move_piece(old_position, new_position, 'main')
             self.update_turn()
 
         return my_move.is_valid
 
     ## Actually move a piece
-    def move_piece(self, old_position, new_position, main_move):
+    def move_piece(self, old_position, new_position, move_type):
 
         piece = self.board[old_position]
 
         for render in self.renders:
-            if main_move == True:
+            if move_type == 'main':
                 render.unhighlight_last_moved_piece()
                 render.unhighlight_last_moved_board()
             render.unrender_piece(piece)
@@ -110,11 +127,11 @@ class game():
         ## For each rendering of the board
         for render in self.renders:
             render.render_piece(piece)
-            if main_move == True:
+            if move_type == 'main':
                 render.highlight_last_moved_board(old_position)
                 render.highlight_last_moved_piece(new_position)
 
-        if main_move != True:
+        if move_type == 'capture':
             print(f'A {piece.colour} {piece.piece_type} has been captured!\n')
 
         # Todo

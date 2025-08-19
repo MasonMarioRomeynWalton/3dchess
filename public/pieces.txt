@@ -11,33 +11,11 @@
         "moved_last_turn": false
     },
     {
-        "piece_type": "king",
-        "colour": 1,
-        "position": [
-            7,
-            7,
-            4
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
         "piece_type": "pawn",
         "colour": 0,
         "position": [
             1,
             2,
-            0
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            6,
-            5,
             0
         ],
         "has_moved": false,
@@ -56,32 +34,10 @@
     },
     {
         "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            6,
-            5,
-            1
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
         "colour": 0,
         "position": [
             1,
             2,
-            2
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            6,
-            5,
             2
         ],
         "has_moved": false,
@@ -100,32 +56,10 @@
     },
     {
         "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            6,
-            5,
-            3
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
         "colour": 0,
         "position": [
             1,
             2,
-            4
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            6,
-            5,
             4
         ],
         "has_moved": false,
@@ -144,32 +78,10 @@
     },
     {
         "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            6,
-            5,
-            5
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
         "colour": 0,
         "position": [
             1,
             2,
-            6
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            6,
-            5,
             6
         ],
         "has_moved": false,
@@ -188,32 +100,10 @@
     },
     {
         "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            6,
-            5,
-            7
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
         "colour": 0,
         "position": [
             2,
             1,
-            0
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            5,
-            6,
             0
         ],
         "has_moved": false,
@@ -232,32 +122,10 @@
     },
     {
         "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            5,
-            6,
-            1
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
         "colour": 0,
         "position": [
             2,
             1,
-            2
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            5,
-            6,
             2
         ],
         "has_moved": false,
@@ -276,32 +144,10 @@
     },
     {
         "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            5,
-            6,
-            3
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
         "colour": 0,
         "position": [
             2,
             1,
-            4
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            5,
-            6,
             4
         ],
         "has_moved": false,
@@ -320,32 +166,10 @@
     },
     {
         "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            5,
-            6,
-            5
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
         "colour": 0,
         "position": [
             2,
             1,
-            6
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            5,
-            6,
             6
         ],
         "has_moved": false,
@@ -363,33 +187,11 @@
         "moved_last_turn": false
     },
     {
-        "piece_type": "pawn",
-        "colour": 1,
-        "position": [
-            5,
-            6,
-            7
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
         "piece_type": "peasant",
         "colour": 0,
         "position": [
             0,
             2,
-            0
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            7,
-            5,
             0
         ],
         "has_moved": false,
@@ -408,14 +210,14 @@
     },
     {
         "piece_type": "peasant",
-        "colour": 1,
+        "colour": 0,
         "position": [
-            7,
-            5,
-            1
+            2,
+            3,
+            2
         ],
-        "has_moved": false,
-        "moved_last_turn": false
+        "has_moved": true,
+        "moved_last_turn": true
     },
     {
         "piece_type": "peasant",
@@ -423,39 +225,6 @@
         "position": [
             0,
             2,
-            2
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            7,
-            5,
-            2
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
-        "colour": 0,
-        "position": [
-            0,
-            2,
-            3
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            7,
-            5,
             3
         ],
         "has_moved": false,
@@ -474,32 +243,10 @@
     },
     {
         "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            7,
-            5,
-            4
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
         "colour": 0,
         "position": [
             0,
             2,
-            5
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            7,
-            5,
             5
         ],
         "has_moved": false,
@@ -518,32 +265,10 @@
     },
     {
         "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            7,
-            5,
-            6
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
         "colour": 0,
         "position": [
             0,
             2,
-            7
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            7,
-            5,
             7
         ],
         "has_moved": false,
@@ -562,32 +287,10 @@
     },
     {
         "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            5,
-            7,
-            0
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
         "colour": 0,
         "position": [
             2,
             0,
-            1
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            5,
-            7,
             1
         ],
         "has_moved": false,
@@ -606,32 +309,10 @@
     },
     {
         "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            5,
-            7,
-            2
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
         "colour": 0,
         "position": [
             2,
             0,
-            3
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            5,
-            7,
             3
         ],
         "has_moved": false,
@@ -650,32 +331,10 @@
     },
     {
         "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            5,
-            7,
-            4
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
         "colour": 0,
         "position": [
             2,
             0,
-            5
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            5,
-            7,
             5
         ],
         "has_moved": false,
@@ -694,32 +353,10 @@
     },
     {
         "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            5,
-            7,
-            6
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
         "colour": 0,
         "position": [
             2,
             0,
-            7
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "peasant",
-        "colour": 1,
-        "position": [
-            5,
-            7,
             7
         ],
         "has_moved": false,
@@ -738,32 +375,10 @@
     },
     {
         "piece_type": "soldier",
-        "colour": 1,
-        "position": [
-            5,
-            5,
-            0
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "soldier",
         "colour": 0,
         "position": [
             2,
             2,
-            1
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "soldier",
-        "colour": 1,
-        "position": [
-            5,
-            5,
             1
         ],
         "has_moved": false,
@@ -782,32 +397,10 @@
     },
     {
         "piece_type": "soldier",
-        "colour": 1,
-        "position": [
-            5,
-            5,
-            2
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "soldier",
         "colour": 0,
         "position": [
             2,
             2,
-            3
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "soldier",
-        "colour": 1,
-        "position": [
-            5,
-            5,
             3
         ],
         "has_moved": false,
@@ -826,32 +419,10 @@
     },
     {
         "piece_type": "soldier",
-        "colour": 1,
-        "position": [
-            5,
-            5,
-            4
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "soldier",
         "colour": 0,
         "position": [
             2,
             2,
-            5
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "soldier",
-        "colour": 1,
-        "position": [
-            5,
-            5,
             5
         ],
         "has_moved": false,
@@ -870,32 +441,10 @@
     },
     {
         "piece_type": "soldier",
-        "colour": 1,
-        "position": [
-            5,
-            5,
-            6
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "soldier",
         "colour": 0,
         "position": [
             2,
             2,
-            7
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "soldier",
-        "colour": 1,
-        "position": [
-            5,
-            5,
             7
         ],
         "has_moved": false,
@@ -914,32 +463,10 @@
     },
     {
         "piece_type": "knight",
-        "colour": 1,
-        "position": [
-            7,
-            6,
-            0
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "knight",
         "colour": 0,
         "position": [
             1,
             1,
-            3
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "knight",
-        "colour": 1,
-        "position": [
-            6,
-            6,
             3
         ],
         "has_moved": false,
@@ -958,32 +485,10 @@
     },
     {
         "piece_type": "knight",
-        "colour": 1,
-        "position": [
-            6,
-            6,
-            4
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "knight",
         "colour": 0,
         "position": [
             0,
             1,
-            7
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "knight",
-        "colour": 1,
-        "position": [
-            7,
-            6,
             7
         ],
         "has_moved": false,
@@ -1002,32 +507,10 @@
     },
     {
         "piece_type": "horse",
-        "colour": 1,
-        "position": [
-            6,
-            6,
-            0
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "horse",
         "colour": 0,
         "position": [
             0,
             1,
-            1
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "horse",
-        "colour": 1,
-        "position": [
-            7,
-            6,
             1
         ],
         "has_moved": false,
@@ -1046,32 +529,10 @@
     },
     {
         "piece_type": "horse",
-        "colour": 1,
-        "position": [
-            7,
-            6,
-            6
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "horse",
         "colour": 0,
         "position": [
             1,
             1,
-            7
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "horse",
-        "colour": 1,
-        "position": [
-            6,
-            6,
             7
         ],
         "has_moved": false,
@@ -1090,17 +551,6 @@
     },
     {
         "piece_type": "elephant",
-        "colour": 1,
-        "position": [
-            6,
-            7,
-            0
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "elephant",
         "colour": 0,
         "position": [
             1,
@@ -1112,32 +562,10 @@
     },
     {
         "piece_type": "elephant",
-        "colour": 1,
-        "position": [
-            6,
-            6,
-            1
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "elephant",
         "colour": 0,
         "position": [
             1,
             1,
-            6
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "elephant",
-        "colour": 1,
-        "position": [
-            6,
-            6,
             6
         ],
         "has_moved": false,
@@ -1149,17 +577,6 @@
         "position": [
             1,
             0,
-            7
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "elephant",
-        "colour": 1,
-        "position": [
-            6,
-            7,
             7
         ],
         "has_moved": false,
@@ -1178,17 +595,6 @@
     },
     {
         "piece_type": "rook",
-        "colour": 1,
-        "position": [
-            7,
-            7,
-            0
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "rook",
         "colour": 0,
         "position": [
             1,
@@ -1200,32 +606,10 @@
     },
     {
         "piece_type": "rook",
-        "colour": 1,
-        "position": [
-            6,
-            6,
-            2
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "rook",
         "colour": 0,
         "position": [
             1,
             1,
-            5
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "rook",
-        "colour": 1,
-        "position": [
-            6,
-            6,
             5
         ],
         "has_moved": false,
@@ -1243,33 +627,11 @@
         "moved_last_turn": false
     },
     {
-        "piece_type": "rook",
-        "colour": 1,
-        "position": [
-            7,
-            7,
-            7
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
         "piece_type": "bishop",
         "colour": 0,
         "position": [
             1,
             0,
-            1
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "bishop",
-        "colour": 1,
-        "position": [
-            6,
-            7,
             1
         ],
         "has_moved": false,
@@ -1288,17 +650,6 @@
     },
     {
         "piece_type": "bishop",
-        "colour": 1,
-        "position": [
-            7,
-            6,
-            2
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "bishop",
         "colour": 0,
         "position": [
             0,
@@ -1310,32 +661,10 @@
     },
     {
         "piece_type": "bishop",
-        "colour": 1,
-        "position": [
-            7,
-            6,
-            5
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "bishop",
         "colour": 0,
         "position": [
             1,
             0,
-            6
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "bishop",
-        "colour": 1,
-        "position": [
-            6,
-            7,
             6
         ],
         "has_moved": false,
@@ -1354,32 +683,10 @@
     },
     {
         "piece_type": "cardinal",
-        "colour": 1,
-        "position": [
-            7,
-            7,
-            1
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "cardinal",
         "colour": 0,
         "position": [
             1,
             0,
-            2
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "cardinal",
-        "colour": 1,
-        "position": [
-            6,
-            7,
             2
         ],
         "has_moved": false,
@@ -1398,32 +705,10 @@
     },
     {
         "piece_type": "cardinal",
-        "colour": 1,
-        "position": [
-            6,
-            7,
-            5
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "cardinal",
         "colour": 0,
         "position": [
             0,
             0,
-            6
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "cardinal",
-        "colour": 1,
-        "position": [
-            7,
-            7,
             6
         ],
         "has_moved": false,
@@ -1442,17 +727,6 @@
     },
     {
         "piece_type": "queen",
-        "colour": 1,
-        "position": [
-            7,
-            7,
-            2
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "queen",
         "colour": 0,
         "position": [
             0,
@@ -1463,33 +737,11 @@
         "moved_last_turn": false
     },
     {
-        "piece_type": "queen",
-        "colour": 1,
-        "position": [
-            7,
-            7,
-            5
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
         "piece_type": "duchess",
         "colour": 0,
         "position": [
             1,
             0,
-            3
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "duchess",
-        "colour": 1,
-        "position": [
-            6,
-            7,
             3
         ],
         "has_moved": false,
@@ -1507,17 +759,6 @@
         "moved_last_turn": false
     },
     {
-        "piece_type": "duchess",
-        "colour": 1,
-        "position": [
-            6,
-            7,
-            4
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
         "piece_type": "princess",
         "colour": 0,
         "position": [
@@ -1530,32 +771,10 @@
     },
     {
         "piece_type": "princess",
-        "colour": 1,
-        "position": [
-            7,
-            6,
-            3
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "princess",
         "colour": 0,
         "position": [
             0,
             1,
-            4
-        ],
-        "has_moved": false,
-        "moved_last_turn": false
-    },
-    {
-        "piece_type": "princess",
-        "colour": 1,
-        "position": [
-            7,
-            6,
             4
         ],
         "has_moved": false,
@@ -1568,6 +787,787 @@
             0,
             0,
             3
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "king",
+        "colour": 1,
+        "position": [
+            7,
+            7,
+            4
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            6,
+            5,
+            0
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            6,
+            5,
+            1
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            6,
+            5,
+            2
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            6,
+            5,
+            3
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            6,
+            5,
+            4
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            6,
+            5,
+            5
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            6,
+            5,
+            6
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            6,
+            5,
+            7
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            5,
+            6,
+            0
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            5,
+            6,
+            1
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            5,
+            6,
+            2
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            5,
+            6,
+            3
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            5,
+            6,
+            4
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            5,
+            6,
+            5
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            5,
+            6,
+            6
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "pawn",
+        "colour": 1,
+        "position": [
+            5,
+            6,
+            7
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            7,
+            5,
+            0
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            7,
+            5,
+            1
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            7,
+            5,
+            2
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            7,
+            5,
+            3
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            7,
+            5,
+            4
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            7,
+            5,
+            5
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            7,
+            5,
+            6
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            7,
+            5,
+            7
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            5,
+            7,
+            0
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            5,
+            7,
+            1
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            5,
+            7,
+            2
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            5,
+            7,
+            3
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            5,
+            7,
+            4
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            5,
+            7,
+            5
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            5,
+            7,
+            6
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "peasant",
+        "colour": 1,
+        "position": [
+            5,
+            7,
+            7
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "soldier",
+        "colour": 1,
+        "position": [
+            5,
+            5,
+            0
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "soldier",
+        "colour": 1,
+        "position": [
+            5,
+            5,
+            1
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "soldier",
+        "colour": 1,
+        "position": [
+            5,
+            5,
+            2
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "soldier",
+        "colour": 1,
+        "position": [
+            5,
+            5,
+            3
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "soldier",
+        "colour": 1,
+        "position": [
+            5,
+            5,
+            4
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "soldier",
+        "colour": 1,
+        "position": [
+            5,
+            5,
+            5
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "soldier",
+        "colour": 1,
+        "position": [
+            5,
+            5,
+            6
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "soldier",
+        "colour": 1,
+        "position": [
+            5,
+            5,
+            7
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "knight",
+        "colour": 1,
+        "position": [
+            7,
+            6,
+            0
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "knight",
+        "colour": 1,
+        "position": [
+            6,
+            6,
+            3
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "knight",
+        "colour": 1,
+        "position": [
+            6,
+            6,
+            4
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "knight",
+        "colour": 1,
+        "position": [
+            7,
+            6,
+            7
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "horse",
+        "colour": 1,
+        "position": [
+            6,
+            6,
+            0
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "horse",
+        "colour": 1,
+        "position": [
+            7,
+            6,
+            1
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "horse",
+        "colour": 1,
+        "position": [
+            7,
+            6,
+            6
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "horse",
+        "colour": 1,
+        "position": [
+            6,
+            6,
+            7
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "elephant",
+        "colour": 1,
+        "position": [
+            6,
+            7,
+            0
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "elephant",
+        "colour": 1,
+        "position": [
+            6,
+            6,
+            1
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "elephant",
+        "colour": 1,
+        "position": [
+            6,
+            6,
+            6
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "elephant",
+        "colour": 1,
+        "position": [
+            6,
+            7,
+            7
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "rook",
+        "colour": 1,
+        "position": [
+            7,
+            7,
+            0
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "rook",
+        "colour": 1,
+        "position": [
+            6,
+            6,
+            2
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "rook",
+        "colour": 1,
+        "position": [
+            6,
+            6,
+            5
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "rook",
+        "colour": 1,
+        "position": [
+            7,
+            7,
+            7
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "bishop",
+        "colour": 1,
+        "position": [
+            6,
+            7,
+            1
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "bishop",
+        "colour": 1,
+        "position": [
+            7,
+            6,
+            2
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "bishop",
+        "colour": 1,
+        "position": [
+            7,
+            6,
+            5
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "bishop",
+        "colour": 1,
+        "position": [
+            6,
+            7,
+            6
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "cardinal",
+        "colour": 1,
+        "position": [
+            7,
+            7,
+            1
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "cardinal",
+        "colour": 1,
+        "position": [
+            6,
+            7,
+            2
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "cardinal",
+        "colour": 1,
+        "position": [
+            6,
+            7,
+            5
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "cardinal",
+        "colour": 1,
+        "position": [
+            7,
+            7,
+            6
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "queen",
+        "colour": 1,
+        "position": [
+            7,
+            7,
+            2
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "queen",
+        "colour": 1,
+        "position": [
+            7,
+            7,
+            5
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "duchess",
+        "colour": 1,
+        "position": [
+            6,
+            7,
+            3
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "duchess",
+        "colour": 1,
+        "position": [
+            6,
+            7,
+            4
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "princess",
+        "colour": 1,
+        "position": [
+            7,
+            6,
+            3
+        ],
+        "has_moved": false,
+        "moved_last_turn": false
+    },
+    {
+        "piece_type": "princess",
+        "colour": 1,
+        "position": [
+            7,
+            6,
+            4
         ],
         "has_moved": false,
         "moved_last_turn": false
