@@ -5,6 +5,7 @@ from panda3d.core import *
 import time
 import itertools
 import numpy
+import json
 
 from . import controlable_camera
 
@@ -126,28 +127,14 @@ class rendering_task():
 
     def render_all_3d_models(self):
         
-        # Get these from file
+        with open(f'static/texture_list.txt') as f:
+            json_texture_list = f.read()
+        texture_list = json.loads(json_texture_list)
 
-        colour_list = []
-        for i in range(0,8):
-            colour_list.append(f'board_{i}')
-
-        for i in range(0,2):
-            colour_list.append(f'player_{i}')
-            colour_list.append(f'move_piece_{i}')
-            colour_list.append(f'capture_piece_{i}')
-            colour_list.append(f'last_moved_piece_{i}')
-
-        colour_list.append(f'capture_board')
-        colour_list.append(f'last_moved_board')
-
-        colour_list.append('grid')
-        colour_list.append('post')
-
-        self.colour_map = {}
-        for colour in colour_list:
-            self.colour_map[colour] = loader.loadTexture(f'{home}/static/maps/{colour}.png')
-            self.colour_map[f'{colour}'].setMagfilter(SamplerState.FT_nearest)
+        self.texture_map = {}
+        for texture in texture_list:
+            self.texture_map[texture] = loader.loadTexture(f'{home}/static/maps/{texture}.png')
+            self.texture_map[f'{texture}'].setMagfilter(SamplerState.FT_nearest)
 
 
         self.directionalLight = [[45,0,0],[135,0,0],[45,180,0],[135,180,0],[45,30,0],[45,-30,0],[135,30,0],[135,-30,0],[45,150,0],[45,-150,0],[135,150,0],[135,-150,0]]
@@ -210,7 +197,7 @@ class rendering_task():
         )
 
         if texture != None:
-            rendered_object.setTexture(self.colour_map[texture])
+            rendered_object.setTexture(self.texture_map[texture])
 
         return rendered_object
 
@@ -257,7 +244,7 @@ class rendering_task():
 
         current_board_segment_render = board_segment_render(
             position,
-            self.colour_map[f'board_{top_colour}']
+            self.texture_map[f'board_{top_colour}']
         )
 
         ## Because the board is rendered slightly lower than the pieces
@@ -343,7 +330,7 @@ class rendering_task():
         # Need to figure out captured pieces
         # For making sure moved last turn pieces are highlighted at start of game
         if not None in self.game.moved_from_last_turn:
-            self.board[self.game.moved_from_last_turn[1]-1][self.game.moved_from_last_turn[2]-1][self.game.moved_from_last_turn[0]-1].atr['obj'].setTexture(self.colour_map['last_moved_board'])
+            self.board[self.game.moved_from_last_turn[1]-1][self.game.moved_from_last_turn[2]-1][self.game.moved_from_last_turn[0]-1].atr['obj'].setTexture(self.texture_map['last_moved_board'])
 
     def render_piece(self,piece):
         current_piece_render = piece_render(
@@ -416,29 +403,29 @@ class rendering_task():
 
         ## If the piece is picked to be moved
         if highlight_piece.is_picked_for_move == True:
-            colour = self.colour_map[f'move_piece_{highlight_piece.colour}']
+            colour = self.texture_map[f'move_piece_{highlight_piece.colour}']
 
         ## If the piece is picked to be captured
         elif highlight_piece.is_picked_for_capture == True:
             if piecetype == 'piece':
-                colour = self.colour_map[f'capture_piece_{highlight_piece.colour}']
+                colour = self.texture_map[f'capture_piece_{highlight_piece.colour}']
             elif piecetype == 'board':
-                colour = self.colour_map[f'capture_board']
+                colour = self.texture_map[f'capture_board']
 
         ## If the piece has been moved or moved from in the last turn
         elif highlight_piece.moved_last_turn == True:
             if piecetype == 'piece':
-                colour = self.colour_map[f'last_moved_piece_{highlight_piece.colour}']
+                colour = self.texture_map[f'last_moved_piece_{highlight_piece.colour}']
             elif piecetype == 'board':
-                colour = self.colour_map[f'last_moved_board']
+                colour = self.texture_map[f'last_moved_board']
 
         ## Unhighlight the piece
         else:
             if piecetype == 'piece':
-                colour = self.colour_map[f'player_{highlight_piece.colour}']
+                colour = self.texture_map[f'player_{highlight_piece.colour}']
             elif piecetype == 'board':
                 if highlight_piece.position == self.game.moved_from_last_turn:
-                    colour = self.colour_map['last_moved_board']
+                    colour = self.texture_map['last_moved_board']
                 else:
                     colour = highlight_piece.colour
 

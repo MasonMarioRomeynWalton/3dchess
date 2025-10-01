@@ -1,5 +1,5 @@
 {
-    "turn": 1,
+    "turn": 0,
     "next_captured_pos_white": [
         9,
         9,
