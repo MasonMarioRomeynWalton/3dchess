@@ -2,6 +2,7 @@ from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
 from panda3d.core import *
 
+import os
 import time
 import itertools
 import numpy
@@ -127,9 +128,12 @@ class rendering_task():
 
     def render_all_3d_models(self):
         
-        with open(f'static/texture_list.txt') as f:
-            json_texture_list = f.read()
-        texture_list = json.loads(json_texture_list)
+        ## Load the textures
+        texture_list = os.listdir(f'static/maps')
+
+        ## Remove the extension
+        for i in range(len(texture_list)):
+            texture_list[i] = texture_list[i][:-4]
 
         self.texture_map = {}
         for texture in texture_list:
@@ -137,6 +141,7 @@ class rendering_task():
             self.texture_map[f'{texture}'].setMagfilter(SamplerState.FT_nearest)
 
 
+        ## Set up the lighting
         self.directionalLight = [[45,0,0],[135,0,0],[45,180,0],[135,180,0],[45,30,0],[45,-30,0],[135,30,0],[135,-30,0],[45,150,0],[45,-150,0],[135,150,0],[135,-150,0]]
         self.directionalLights = []
         self.directionalLightNP= []
